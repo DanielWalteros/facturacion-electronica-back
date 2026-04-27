@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * MockMvc tests for LogFacturaController.
- * Requirements: 4.1, 4.2, 4.3, 4.5
+ * Requirements: 5.1, 5.3, 5.4, 5.5
  */
 @ExtendWith(MockitoExtension.class)
 class LogFacturaControllerTest {
@@ -63,7 +63,7 @@ class LogFacturaControllerTest {
                 .pageSize(50)
                 .build();
 
-        when(logFacturaService.getLogs(eq(12345L), eq(0), eq(50))).thenReturn(response);
+        when(logFacturaService.getLogs(eq("12345"), eq(0), eq(50))).thenReturn(response);
 
         mockMvc.perform(get("/api/v1/facturacion/logs/12345")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -90,7 +90,7 @@ class LogFacturaControllerTest {
                 .pageSize(50)
                 .build();
 
-        when(logFacturaService.getLogs(anyLong(), anyInt(), anyInt())).thenReturn(emptyResponse);
+        when(logFacturaService.getLogs(anyString(), anyInt(), anyInt())).thenReturn(emptyResponse);
 
         mockMvc.perform(get("/api/v1/facturacion/logs/99999")
                         .contentType(MediaType.APPLICATION_JSON))

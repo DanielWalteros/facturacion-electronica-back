@@ -8,7 +8,6 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 @Repository
@@ -18,16 +17,15 @@ public class DashboardRepository {
     private final DatabaseAdapterV3Client adapterClient;
     private final DatabaseAdapterV3Properties properties;
 
-    public List<Map<String, Object>> getDashboardKpis(LocalDate fechaInicio, LocalDate fechaFin) {
+    public Object getDashboardKpis(LocalDate fechaInicio, LocalDate fechaFin) {
         Map<String, Object> params = new LinkedHashMap<>();
         params.put(ConstantsUtil.IP_FECHA_INICIO, fechaInicio.format(properties.getDateFormatter()));
         params.put(ConstantsUtil.IP_FECHA_FIN, fechaFin.format(properties.getDateFormatter()));
 
-        return adapterClient.executeStoredProcedure(
+        return adapterClient.executeStoredProcedureClob(
                 properties.getPackageName(),
                 properties.getProcedures().getDashboardKpis(),
-                params,
-                ConstantsUtil.OP_CURSOR
+                params
         );
     }
 }

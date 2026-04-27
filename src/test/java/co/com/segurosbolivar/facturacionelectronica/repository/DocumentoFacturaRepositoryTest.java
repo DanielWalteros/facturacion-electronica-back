@@ -20,7 +20,7 @@ import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for DocumentoFacturaRepository.
- * Requirements: 3.1
+ * Requirements: 4.1, 4.2
  */
 @ExtendWith(MockitoExtension.class)
 class DocumentoFacturaRepositoryTest {
@@ -45,50 +45,47 @@ class DocumentoFacturaRepositoryTest {
 
     @Test
     void getDocFactura_buildsCorrectParameterMap() {
-        Long idIntFac = 12345L;
+        String idIntFac = "12345";
 
-        when(adapterClient.executeStoredProcedure(anyString(), anyString(), any(), anyString()))
+        when(adapterClient.executeStoredProcedureClob(anyString(), anyString(), any()))
                 .thenReturn(Collections.emptyList());
 
         repository.getDocFactura(idIntFac);
 
         @SuppressWarnings("unchecked")
         ArgumentCaptor<Map<String, Object>> paramsCaptor = ArgumentCaptor.forClass(Map.class);
-        verify(adapterClient).executeStoredProcedure(
+        verify(adapterClient).executeStoredProcedureClob(
                 eq("SIM_PCK_FACTURA_ELECTRONICA"),
                 eq("PRC_GET_DOC_FACTURA"),
-                paramsCaptor.capture(),
-                eq(ConstantsUtil.OP_CURSOR)
+                paramsCaptor.capture()
         );
 
         Map<String, Object> params = paramsCaptor.getValue();
-        assertEquals(12345L, params.get(ConstantsUtil.IP_ID_INT_FAC));
+        assertEquals("12345", params.get(ConstantsUtil.IP_ID_INT_FAC));
         assertEquals(1, params.size());
     }
 
     @Test
     void getDocFactura_returnsAdapterClientResult() {
-        Long idIntFac = 99999L;
+        String idIntFac = "99999";
 
         List<Map<String, Object>> expectedResult = List.of(
-                Map.of("id_int_fac", 99999L, "estado", "PR")
+                Map.of("id_int_fac", "99999", "estado", "PR")
         );
 
-        when(adapterClient.executeStoredProcedure(
+        when(adapterClient.executeStoredProcedureClob(
                 eq("SIM_PCK_FACTURA_ELECTRONICA"),
                 eq("PRC_GET_DOC_FACTURA"),
-                any(),
-                eq(ConstantsUtil.OP_CURSOR)
+                any()
         )).thenReturn(expectedResult);
 
-        List<Map<String, Object>> result = repository.getDocFactura(idIntFac);
+        Object result = repository.getDocFactura(idIntFac);
 
         assertEquals(expectedResult, result);
-        verify(adapterClient, times(1)).executeStoredProcedure(
+        verify(adapterClient, times(1)).executeStoredProcedureClob(
                 eq("SIM_PCK_FACTURA_ELECTRONICA"),
                 eq("PRC_GET_DOC_FACTURA"),
-                any(),
-                eq(ConstantsUtil.OP_CURSOR)
+                any()
         );
     }
 }

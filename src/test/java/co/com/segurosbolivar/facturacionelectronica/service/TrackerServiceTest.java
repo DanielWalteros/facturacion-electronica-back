@@ -1,7 +1,6 @@
 package co.com.segurosbolivar.facturacionelectronica.service;
 
 import co.com.segurosbolivar.facturacionelectronica.core.TrackerCoreService;
-import co.com.segurosbolivar.facturacionelectronica.dto.response.PaginatedResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -10,14 +9,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.Collections;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for TrackerService.
- * Requirements: 2.7
+ * Requirements: 3.8
  */
 @ExtendWith(MockitoExtension.class)
 class TrackerServiceTest {
@@ -33,7 +31,7 @@ class TrackerServiceTest {
         LocalDate fechaInicio = LocalDate.of(2024, 1, 1);
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> trackerService.getFacturas(null, fechaInicio, null, 0, 20));
+                () -> trackerService.getFacturas(null, null, fechaInicio, null, 1, 50));
 
         assertTrue(ex.getMessage().contains("Ambas fechas"));
         verifyNoInteractions(coreService);
@@ -44,7 +42,7 @@ class TrackerServiceTest {
         LocalDate fechaFin = LocalDate.of(2024, 12, 31);
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> trackerService.getFacturas("POL-001", null, fechaFin, 0, 20));
+                () -> trackerService.getFacturas("POL-001", null, null, fechaFin, 1, 50));
 
         assertTrue(ex.getMessage().contains("Ambas fechas"));
         verifyNoInteractions(coreService);
@@ -55,39 +53,23 @@ class TrackerServiceTest {
         LocalDate fechaInicio = LocalDate.of(2024, 1, 1);
         LocalDate fechaFin = LocalDate.of(2024, 12, 31);
 
-        PaginatedResponse<Map<String, Object>> expected = PaginatedResponse.<Map<String, Object>>builder()
-                .content(Collections.emptyList())
-                .totalElements(0)
-                .totalPages(0)
-                .currentPage(0)
-                .pageSize(20)
-                .build();
+        when(coreService.getFacturas("POL-001", null, fechaInicio, fechaFin, 1, 50))
+                .thenReturn(Collections.emptyList());
 
-        when(coreService.getFacturas("POL-001", fechaInicio, fechaFin, 0, 20))
-                .thenReturn(expected);
+        Object result = trackerService.getFacturas("POL-001", null, fechaInicio, fechaFin, 1, 50);
 
-        PaginatedResponse<Map<String, Object>> result = trackerService.getFacturas("POL-001", fechaInicio, fechaFin, 0, 20);
-
-        assertEquals(expected, result);
-        verify(coreService).getFacturas("POL-001", fechaInicio, fechaFin, 0, 20);
+        assertNotNull(result);
+        verify(coreService).getFacturas("POL-001", null, fechaInicio, fechaFin, 1, 50);
     }
 
     @Test
     void getFacturas_bothDatesNull_delegatesToCoreService() {
-        PaginatedResponse<Map<String, Object>> expected = PaginatedResponse.<Map<String, Object>>builder()
-                .content(Collections.emptyList())
-                .totalElements(0)
-                .totalPages(0)
-                .currentPage(0)
-                .pageSize(20)
-                .build();
+        when(coreService.getFacturas(null, null, null, null, 1, 50))
+                .thenReturn(Collections.emptyList());
 
-        when(coreService.getFacturas(null, null, null, 0, 20))
-                .thenReturn(expected);
+        Object result = trackerService.getFacturas(null, null, null, null, 1, 50);
 
-        PaginatedResponse<Map<String, Object>> result = trackerService.getFacturas(null, null, null, 0, 20);
-
-        assertEquals(expected, result);
-        verify(coreService).getFacturas(null, null, null, 0, 20);
+        assertNotNull(result);
+        verify(coreService).getFacturas(null, null, null, null, 1, 50);
     }
 }

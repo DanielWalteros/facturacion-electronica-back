@@ -8,7 +8,6 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 @Repository
@@ -18,22 +17,27 @@ public class TrackerRepository {
     private final DatabaseAdapterV3Client adapterClient;
     private final DatabaseAdapterV3Properties properties;
 
-    public List<Map<String, Object>> getSeguimientoFacturas(String numPoliza, LocalDate fechaInicio, LocalDate fechaFin) {
+    public Object getSeguimientoFacturas(String numPoliza, String nroDocumento,
+                                         LocalDate fechaInicio, LocalDate fechaFin,
+                                         int pagina, int tamano) {
         Map<String, Object> params = new LinkedHashMap<>();
         params.put(ConstantsUtil.IP_NUM_POLIZA, numPoliza);
+        params.put(ConstantsUtil.IP_NRO_DOCUMENTO, nroDocumento);
 
         if (fechaInicio != null) {
-            params.put(ConstantsUtil.IP_FECHA_INI, fechaInicio.format(properties.getDateFormatter()));
+            params.put(ConstantsUtil.IP_FECHA_INICIO, fechaInicio.format(properties.getDateFormatter()));
         }
         if (fechaFin != null) {
             params.put(ConstantsUtil.IP_FECHA_FIN, fechaFin.format(properties.getDateFormatter()));
         }
 
-        return adapterClient.executeStoredProcedure(
+        params.put(ConstantsUtil.IP_PAGINA, pagina);
+        params.put(ConstantsUtil.IP_TAMANO, tamano);
+
+        return adapterClient.executeStoredProcedureClob(
                 properties.getPackageName(),
                 properties.getProcedures().getSeguimientoFacturas(),
-                params,
-                ConstantsUtil.OP_CURSOR
+                params
         );
     }
 }

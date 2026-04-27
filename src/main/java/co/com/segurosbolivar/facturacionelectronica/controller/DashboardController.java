@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/facturacion/dashboard")
@@ -30,12 +28,45 @@ public class DashboardController {
     @ApiResponse(responseCode = "200", description = "KPIs obtenidos exitosamente")
     @ApiResponse(responseCode = "400", description = "Parámetros de fecha inválidos o faltantes")
     @GetMapping("/kpis")
-    public ResponseEntity<List<Map<String, Object>>> getKpis(
+    public ResponseEntity<Object> getKpis(
             @Parameter(description = "Fecha inicio (yyyy-MM-dd)", required = true)
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fechaInicio,
             @Parameter(description = "Fecha fin (yyyy-MM-dd)", required = true)
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fechaFin) {
 
         return ResponseEntity.ok(dashboardService.getKpis(fechaInicio, fechaFin));
+    }
+
+    @GetMapping("/errores-agrupados")
+    public ResponseEntity<Object> getErroresAgrupados(
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fechaInicio,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fechaFin) {
+
+        return ResponseEntity.ok(dashboardService.getErroresAgrupados(fechaInicio, fechaFin));
+    }
+
+    @GetMapping("/duplicados")
+    public ResponseEntity<Object> getDuplicados(
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fechaInicio,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fechaFin) {
+
+        return ResponseEntity.ok(dashboardService.getDuplicados(fechaInicio, fechaFin));
+    }
+
+    @GetMapping("/tiempo-promedio-emision")
+    public ResponseEntity<Object> getTiempoPromedioEmision(
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fechaInicio,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fechaFin) {
+
+        return ResponseEntity.ok(dashboardService.getTiempoPromedioEmision(fechaInicio, fechaFin));
+    }
+
+    @GetMapping("/top-productos-fallas")
+    public ResponseEntity<Object> getTopProductosFallas(
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fechaInicio,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fechaFin,
+            @RequestParam(defaultValue = "5") int topN) {
+
+        return ResponseEntity.ok(dashboardService.getTopProductosFallas(fechaInicio, fechaFin, topN));
     }
 }

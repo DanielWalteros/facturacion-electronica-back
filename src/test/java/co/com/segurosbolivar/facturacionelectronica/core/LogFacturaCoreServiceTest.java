@@ -15,7 +15,7 @@ import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for LogFacturaCoreService.
- * Requirements: 4.2, 4.5, 4.6
+ * Requirements: 5.2, 5.3, 5.5
  */
 @ExtendWith(MockitoExtension.class)
 class LogFacturaCoreServiceTest {
@@ -28,7 +28,7 @@ class LogFacturaCoreServiceTest {
 
     @Test
     void getLogs_callsRepositoryAndPaginates() {
-        Long numSecuPol = 12345L;
+        String numSecuPol = "12345";
 
         List<Map<String, Object>> rawResult = List.of(
                 Map.of("tipo_operacion", "EMISION",
@@ -52,7 +52,7 @@ class LogFacturaCoreServiceTest {
 
     @Test
     void getLogs_emptyCursor_returnsEmptyPaginatedResponse() {
-        Long numSecuPol = 99999L;
+        String numSecuPol = "99999";
 
         when(repository.getDetalleLog(numSecuPol)).thenReturn(Collections.emptyList());
 

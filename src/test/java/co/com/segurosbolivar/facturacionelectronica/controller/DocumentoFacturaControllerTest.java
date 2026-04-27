@@ -15,14 +15,14 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Map;
 
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * MockMvc tests for DocumentoFacturaController.
- * Requirements: 3.1, 3.2, 3.3, 3.4
+ * Requirements: 4.1, 4.2, 4.3, 4.4
  */
 @ExtendWith(MockitoExtension.class)
 class DocumentoFacturaControllerTest {
@@ -44,7 +44,7 @@ class DocumentoFacturaControllerTest {
 
     @Test
     void getDocumentoFactura_notFound_returns404() throws Exception {
-        when(documentoFacturaService.getDocumentoFactura(anyLong()))
+        when(documentoFacturaService.getDocumentoFactura(anyString()))
                 .thenThrow(new ResourceNotFoundException("NOT_FOUND",
                         "Documento de factura no encontrado para idIntFac: 99999"));
 
@@ -70,7 +70,7 @@ class DocumentoFacturaControllerTest {
                 "numDocAdquirente", "1234567890"
         );
 
-        when(documentoFacturaService.getDocumentoFactura(12345L)).thenReturn(response);
+        when(documentoFacturaService.getDocumentoFactura("12345")).thenReturn(response);
 
         mockMvc.perform(get("/api/v1/facturacion/facturas/12345")
                         .contentType(MediaType.APPLICATION_JSON))

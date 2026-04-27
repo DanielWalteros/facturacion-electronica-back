@@ -3,6 +3,7 @@ package co.com.segurosbolivar.facturacionelectronica.client;
 import co.com.segurosbolivar.facturacionelectronica.config.DatabaseAdapterV3Properties;
 import co.com.segurosbolivar.facturacionelectronica.exception.BolivarBusinessException;
 import co.com.segurosbolivar.facturacionelectronica.exception.TipoErrorEnum;
+import co.com.segurosbolivar.facturacionelectronica.util.ConstantsUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -92,6 +93,117 @@ public class DatabaseAdapterV3Client {
                     TipoErrorEnum.TECNICO, "ADAPTER_UNEXPECTED_ERROR",
                     "Error inesperado: " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * Ejecuta un SP con el nuevo patrón de salida CLOB.
+     * Extrae OP_DATA, evalúa OP_RESULTADO, y maneja OP_ARRERRORES.
+     *
+     * @return Object parseado del JSON en OP_DATA (puede ser Map o List)
+     * @throws BolivarBusinessException si OP_RESULTADO != 0 o error de comunicación
+     */
+    public Object executeStoredProcedureClob(
+            String packageName,
+            String procedureName,
+            Map<String, Object> inputParams) {
+
+        try {
+            Map<String, Object> requestBody = buildRequestBody(packageName, procedureName, inputParams);
+            String jsonBody = objectMapper.writeValueAsString(requestBody);
+            String token = getOAuth2Token();
+
+            Request request = new Request.Builder()
+                    .url(properties.getFullUrl())
+                    .post(RequestBody.create(jsonBody, okhttp3.MediaType.parse("application/json; charset=utf-8")))
+                    .addHeader("Authorization", "Bearer " + token)
+                    .addHeader("channel", properties.getChannel())
+                    .addHeader("channel_operation", properties.getChannelOperation())
+                    .build();
+
+            log.info("Ejecutando SP (CLOB) {}.{} vía Adapter V3", packageName, procedureName);
+
+            try (Response response = httpClient.newCall(request).execute()) {
+                if (!response.isSuccessful()) {
+                    String errorBody = response.body() != null ? response.body().string() : "Sin detalle";
+                    throw new BolivarBusinessException(
+                            TipoErrorEnum.TECNICO, "ADAPTER_COMM_ERROR",
+                            "Error de comunicación con Adapter V3: " + response.code() + " " + response.message() + ": " + errorBody);
+                }
+
+                String responseBody = response.body() != null ? response.body().string() : "{}";
+                log.info("Respuesta Adapter V3 CLOB (primeros 500 chars): {}",
+                        responseBody.substring(0, Math.min(500, responseBody.length())));
+
+                @SuppressWarnings("unchecked")
+                Map<String, Object> responseMap = objectMapper.readValue(responseBody, Map.class);
+                Map<String, Object> normalized = normalizeKeys(responseMap);
+
+                // Evaluar OP_RESULTADO
+                Object resultado = normalized.get(ConstantsUtil.OP_RESULTADO);
+                int resultCode = (resultado instanceof Number) ? ((Number) resultado).intValue() : -1;
+
+                if (resultCode != 0) {
+                    Object errores = normalized.get(ConstantsUtil.OP_ARRERRORES);
+                    String errorMsg = buildErrorMessage(errores);
+                    throw new BolivarBusinessException(
+                            TipoErrorEnum.NEGOCIO, "SP_ERROR_" + resultCode, errorMsg);
+                }
+
+                // Extraer y parsear OP_DATA
+                Object opData = normalized.get(ConstantsUtil.OP_DATA);
+                if (opData == null || (opData instanceof String && ((String) opData).isBlank())) {
+                    return Collections.emptyList();
+                }
+
+                if (opData instanceof String) {
+                    String json = ((String) opData).trim();
+                    if (json.startsWith("[")) {
+                        return objectMapper.readValue(json,
+                                new TypeReference<List<Map<String, Object>>>() {});
+                    } else {
+                        return objectMapper.readValue(json,
+                                new TypeReference<Map<String, Object>>() {});
+                    }
+                }
+
+                // Si ya viene parseado (List o Map), retornar directamente
+                return opData;
+            }
+
+        } catch (BolivarBusinessException e) {
+            throw e;
+        } catch (IOException e) {
+            log.error("Error de comunicación con Adapter V3 (CLOB): {}", e.getMessage(), e);
+            throw new BolivarBusinessException(
+                    TipoErrorEnum.TECNICO, "ADAPTER_COMM_ERROR",
+                    "Error de comunicación con Adapter V3: " + e.getMessage(), e);
+        } catch (RuntimeException e) {
+            log.error("Error inesperado al ejecutar SP (CLOB): {}", e.getMessage(), e);
+            throw new BolivarBusinessException(
+                    TipoErrorEnum.TECNICO, "ADAPTER_UNEXPECTED_ERROR",
+                    "Error inesperado: " + e.getMessage(), e);
+        }
+    }
+
+    private String buildErrorMessage(Object errores) {
+        if (errores == null) {
+            return "Error de negocio retornado por el SP (sin detalle)";
+        }
+        if (errores instanceof List) {
+            List<?> errorList = (List<?>) errores;
+            return errorList.stream()
+                    .filter(e -> e instanceof Map)
+                    .map(e -> {
+                        Map<?, ?> errorMap = (Map<?, ?>) e;
+                        Object codigo = errorMap.get("codigo");
+                        Object desc = errorMap.get("descripcion");
+                        String codigoStr = codigo != null ? String.valueOf(codigo) : "";
+                        String descStr = desc != null ? String.valueOf(desc) : "";
+                        return codigoStr + ": " + descStr;
+                    })
+                    .collect(Collectors.joining("; "));
+        }
+        return String.valueOf(errores);
     }
 
     private String getOAuth2Token() {

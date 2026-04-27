@@ -15,7 +15,7 @@ import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for DocumentoFacturaCoreService.
- * Requirements: 3.2, 3.3
+ * Requirements: 4.2, 4.3
  */
 @ExtendWith(MockitoExtension.class)
 class DocumentoFacturaCoreServiceTest {
@@ -27,8 +27,8 @@ class DocumentoFacturaCoreServiceTest {
     private DocumentoFacturaCoreService coreService;
 
     @Test
-    void getDocumentoFactura_callsRepositoryAndReturnsFirstRow() {
-        Long idIntFac = 12345L;
+    void getDocumentoFactura_callsRepositoryAndReturnsResult() {
+        String idIntFac = "12345";
 
         Map<String, Object> row = Map.of(
                 "id_int_fac", 12345,
@@ -39,15 +39,15 @@ class DocumentoFacturaCoreServiceTest {
 
         when(repository.getDocFactura(idIntFac)).thenReturn(rawResult);
 
-        Map<String, Object> result = coreService.getDocumentoFactura(idIntFac);
+        Object result = coreService.getDocumentoFactura(idIntFac);
 
-        assertEquals(row, result);
+        assertEquals(rawResult, result);
         verify(repository).getDocFactura(idIntFac);
     }
 
     @Test
     void getDocumentoFactura_emptyCursor_throwsResourceNotFoundException() {
-        Long idIntFac = 99999L;
+        String idIntFac = "99999";
 
         when(repository.getDocFactura(idIntFac)).thenReturn(Collections.emptyList());
 
@@ -60,7 +60,7 @@ class DocumentoFacturaCoreServiceTest {
 
     @Test
     void getDocumentoFactura_nullCursor_throwsResourceNotFoundException() {
-        Long idIntFac = 88888L;
+        String idIntFac = "88888";
 
         when(repository.getDocFactura(idIntFac)).thenReturn(null);
 

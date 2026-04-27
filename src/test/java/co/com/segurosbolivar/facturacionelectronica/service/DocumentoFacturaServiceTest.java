@@ -14,7 +14,7 @@ import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for DocumentoFacturaService.
- * Requirements: 3.1
+ * Requirements: 4.1
  */
 @ExtendWith(MockitoExtension.class)
 class DocumentoFacturaServiceTest {
@@ -27,7 +27,7 @@ class DocumentoFacturaServiceTest {
 
     @Test
     void getDocumentoFactura_delegatesToCoreService() {
-        Long idIntFac = 12345L;
+        String idIntFac = "12345";
 
         Map<String, Object> expected = Map.of(
                 "idIntFac", 12345,
@@ -38,7 +38,7 @@ class DocumentoFacturaServiceTest {
 
         when(coreService.getDocumentoFactura(idIntFac)).thenReturn(expected);
 
-        Map<String, Object> result = documentoFacturaService.getDocumentoFactura(idIntFac);
+        Object result = documentoFacturaService.getDocumentoFactura(idIntFac);
 
         assertEquals(expected, result);
         verify(coreService).getDocumentoFactura(idIntFac);

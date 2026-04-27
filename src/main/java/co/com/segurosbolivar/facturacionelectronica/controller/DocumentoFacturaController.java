@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
-
 @RestController
 @RequestMapping("/api/v1/facturacion/facturas")
 @RequiredArgsConstructor
@@ -28,9 +26,9 @@ public class DocumentoFacturaController {
     @ApiResponse(responseCode = "404", description = "Documento de factura no encontrado")
     @ApiResponse(responseCode = "400", description = "ID de factura inválido")
     @GetMapping("/{idIntFac}")
-    public ResponseEntity<Map<String, Object>> getDocumentoFactura(
-            @Parameter(description = "ID interno de factura", required = true)
-            @PathVariable Long idIntFac) {
+    public ResponseEntity<Object> getDocumentoFactura(
+            @Parameter(description = "ID interno de factura (VARCHAR2)", required = true)
+            @PathVariable String idIntFac) {
 
         return ResponseEntity.ok(documentoFacturaService.getDocumentoFactura(idIntFac));
     }

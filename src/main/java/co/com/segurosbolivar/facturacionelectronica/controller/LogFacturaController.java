@@ -27,7 +27,7 @@ public class LogFacturaController {
     @GetMapping("/{numSecuPol}")
     public ResponseEntity<PaginatedResponse<Map<String, Object>>> getLogs(
             @Parameter(description = "Número secuencial de póliza", required = true)
-            @PathVariable Long numSecuPol,
+            @PathVariable String numSecuPol,
             @Parameter(description = "Número de página (default 0)")
             @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Tamaño de página (default 50, max 200)")

@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 @Repository
@@ -17,15 +16,14 @@ public class DocumentoFacturaRepository {
     private final DatabaseAdapterV3Client adapterClient;
     private final DatabaseAdapterV3Properties properties;
 
-    public List<Map<String, Object>> getDocFactura(Long idIntFac) {
+    public Object getDocFactura(String idIntFac) {
         Map<String, Object> params = new LinkedHashMap<>();
         params.put(ConstantsUtil.IP_ID_INT_FAC, idIntFac);
 
-        return adapterClient.executeStoredProcedure(
+        return adapterClient.executeStoredProcedureClob(
                 properties.getPackageName(),
                 properties.getProcedures().getDocFactura(),
-                params,
-                ConstantsUtil.OP_CURSOR
+                params
         );
     }
 }

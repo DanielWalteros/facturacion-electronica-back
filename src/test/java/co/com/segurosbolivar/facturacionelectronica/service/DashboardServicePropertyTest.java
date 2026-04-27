@@ -16,7 +16,7 @@ import static org.mockito.Mockito.when;
 /**
  * Property-based test: Invalid Date Range Rejection.
  *
- * Validates: Requirements 1.5
+ * Validates: Requirements 2.5
  */
 @Tag("Feature: facturacion-electronica-consulta, Property 2: Invalid Date Range Rejection")
 class DashboardServicePropertyTest {
@@ -32,7 +32,6 @@ class DashboardServicePropertyTest {
         LocalDate fechaInicio = datePair[0];
         LocalDate fechaFin = datePair[1];
 
-        // fechaInicio > fechaFin must throw IllegalArgumentException
         boolean threw = false;
         try {
             dashboardService.getKpis(fechaInicio, fechaFin);
@@ -52,13 +51,11 @@ class DashboardServicePropertyTest {
         LocalDate fechaInicio = datePair[0];
         LocalDate fechaFin = datePair[1];
 
-        // Mock coreService to return a valid response
         List<Map<String, Object>> mockResponse = Collections.emptyList();
         when(coreService.getKpis(any(LocalDate.class), any(LocalDate.class))).thenReturn(mockResponse);
 
-        // fechaInicio <= fechaFin must NOT throw
         try {
-            List<Map<String, Object>> result = dashboardService.getKpis(fechaInicio, fechaFin);
+            Object result = dashboardService.getKpis(fechaInicio, fechaFin);
             assert result != null : "Result must not be null for valid date range";
         } catch (IllegalArgumentException e) {
             assert false : "Should NOT throw IllegalArgumentException for fechaInicio=" + fechaInicio
@@ -75,7 +72,6 @@ class DashboardServicePropertyTest {
                     return Arbitraries.just(fechaFin);
                 })
                 .flatMap(fechaFin -> {
-                    // fechaInicio must be strictly after fechaFin
                     return Arbitraries.longs().between(1, 3650)
                             .map(daysAfter -> new LocalDate[]{fechaFin.plusDays(daysAfter), fechaFin});
                 });

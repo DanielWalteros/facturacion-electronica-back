@@ -6,23 +6,25 @@ import co.com.segurosbolivar.facturacionelectronica.util.ConstantsUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Repository
 @RequiredArgsConstructor
-public class LogFacturaRepository {
+public class TiempoPromedioEmisionRepository {
 
     private final DatabaseAdapterV3Client adapterClient;
     private final DatabaseAdapterV3Properties properties;
 
-    public Object getDetalleLog(String numSecuPol) {
+    public Object getTiempoPromedioEmision(LocalDate fechaInicio, LocalDate fechaFin) {
         Map<String, Object> params = new LinkedHashMap<>();
-        params.put(ConstantsUtil.IP_NUM_SECU_POL, numSecuPol);
+        params.put(ConstantsUtil.IP_FECHA_INICIO, fechaInicio.format(properties.getDateFormatter()));
+        params.put(ConstantsUtil.IP_FECHA_FIN, fechaFin.format(properties.getDateFormatter()));
 
         return adapterClient.executeStoredProcedureClob(
                 properties.getPackageName(),
-                properties.getProcedures().getDetalleLog(),
+                properties.getProcedures().getTiempoPromedioEmision(),
                 params
         );
     }

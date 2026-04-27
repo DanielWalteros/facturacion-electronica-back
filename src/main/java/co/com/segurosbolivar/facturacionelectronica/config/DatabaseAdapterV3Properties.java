@@ -30,6 +30,11 @@ public class DatabaseAdapterV3Properties {
         private String seguimientoFacturas = "PRC_GET_SEGUIMIENTO_FACTURAS";
         private String docFactura = "PRC_GET_DOC_FACTURA";
         private String detalleLog = "PRC_GET_DETALLE_LOG";
+        // Nuevos V2
+        private String erroresAgrupados = "PRC_GET_ERRORES_AGRUPADOS";
+        private String duplicados = "PRC_GET_DUPLICADOS";
+        private String tiempoPromedioEmision = "PRC_GET_TIEMPO_PROMEDIO_EMISION";
+        private String topProductosFallas = "PRC_GET_TOP_PRODUCTOS_FALLAS";
     }
 
     public DateTimeFormatter getDateFormatter() {

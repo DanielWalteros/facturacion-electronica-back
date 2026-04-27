@@ -13,7 +13,7 @@ public class LogFacturaService {
 
     private final LogFacturaCoreService coreService;
 
-    public PaginatedResponse<Map<String, Object>> getLogs(Long numSecuPol, int page, int size) {
+    public PaginatedResponse<Map<String, Object>> getLogs(String numSecuPol, int page, int size) {
         return coreService.getLogs(numSecuPol, page, size);
     }
 }

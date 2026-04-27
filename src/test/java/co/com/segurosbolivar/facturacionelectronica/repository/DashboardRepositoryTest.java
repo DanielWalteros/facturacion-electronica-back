@@ -11,7 +11,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +21,7 @@ import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for DashboardRepository.
- * Requirements: 1.1
+ * Requirements: 2.1, 2.2
  */
 @ExtendWith(MockitoExtension.class)
 class DashboardRepositoryTest {
@@ -51,18 +50,17 @@ class DashboardRepositoryTest {
         LocalDate fechaInicio = LocalDate.of(2024, 3, 15);
         LocalDate fechaFin = LocalDate.of(2024, 6, 30);
 
-        when(adapterClient.executeStoredProcedure(anyString(), anyString(), any(), anyString()))
+        when(adapterClient.executeStoredProcedureClob(anyString(), anyString(), any()))
                 .thenReturn(Collections.emptyList());
 
         repository.getDashboardKpis(fechaInicio, fechaFin);
 
         @SuppressWarnings("unchecked")
         ArgumentCaptor<Map<String, Object>> paramsCaptor = ArgumentCaptor.forClass(Map.class);
-        verify(adapterClient).executeStoredProcedure(
+        verify(adapterClient).executeStoredProcedureClob(
                 eq("SIM_PCK_FACTURA_ELECTRONICA"),
                 eq("PRC_GET_DASHBOARD_KPIS"),
-                paramsCaptor.capture(),
-                eq(ConstantsUtil.OP_CURSOR)
+                paramsCaptor.capture()
         );
 
         Map<String, Object> params = paramsCaptor.getValue();
@@ -80,21 +78,19 @@ class DashboardRepositoryTest {
                 Map.of("estado", "PR", "cantidad", 100L)
         );
 
-        when(adapterClient.executeStoredProcedure(
+        when(adapterClient.executeStoredProcedureClob(
                 eq("SIM_PCK_FACTURA_ELECTRONICA"),
                 eq("PRC_GET_DASHBOARD_KPIS"),
-                any(),
-                eq(ConstantsUtil.OP_CURSOR)
+                any()
         )).thenReturn(expectedResult);
 
-        List<Map<String, Object>> result = repository.getDashboardKpis(fechaInicio, fechaFin);
+        Object result = repository.getDashboardKpis(fechaInicio, fechaFin);
 
         assertEquals(expectedResult, result);
-        verify(adapterClient, times(1)).executeStoredProcedure(
+        verify(adapterClient, times(1)).executeStoredProcedureClob(
                 eq("SIM_PCK_FACTURA_ELECTRONICA"),
                 eq("PRC_GET_DASHBOARD_KPIS"),
-                any(),
-                eq(ConstantsUtil.OP_CURSOR)
+                any()
         );
     }
 }

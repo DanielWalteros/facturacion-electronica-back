@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -14,16 +13,16 @@ public class DocumentoFacturaCoreService {
 
     private final DocumentoFacturaRepository repository;
 
-    public Map<String, Object> getDocumentoFactura(Long idIntFac) {
-        List<Map<String, Object>> result = repository.getDocFactura(idIntFac);
+    public Object getDocumentoFactura(String idIntFac) {
+        Object result = repository.getDocFactura(idIntFac);
 
-        if (result == null || result.isEmpty()) {
+        if (result == null || (result instanceof List && ((List<?>) result).isEmpty())) {
             throw new ResourceNotFoundException(
                     "NOT_FOUND",
                     "Documento de factura no encontrado para idIntFac: " + idIntFac
             );
         }
 
-        return result.get(0);
+        return result;
     }
 }

@@ -17,7 +17,7 @@ import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for DashboardService.
- * Requirements: 1.5
+ * Requirements: 2.5
  */
 @ExtendWith(MockitoExtension.class)
 class DashboardServiceTest {
@@ -53,7 +53,7 @@ class DashboardServiceTest {
 
         when(coreService.getKpis(fechaInicio, fechaFin)).thenReturn(expected);
 
-        List<Map<String, Object>> result = dashboardService.getKpis(fechaInicio, fechaFin);
+        Object result = dashboardService.getKpis(fechaInicio, fechaFin);
 
         assertEquals(expected, result);
         verify(coreService).getKpis(fechaInicio, fechaFin);
@@ -67,7 +67,7 @@ class DashboardServiceTest {
 
         when(coreService.getKpis(sameDate, sameDate)).thenReturn(expected);
 
-        List<Map<String, Object>> result = dashboardService.getKpis(sameDate, sameDate);
+        Object result = dashboardService.getKpis(sameDate, sameDate);
 
         assertNotNull(result);
         verify(coreService).getKpis(sameDate, sameDate);

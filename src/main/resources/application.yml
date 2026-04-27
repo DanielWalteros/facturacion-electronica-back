@@ -30,6 +30,10 @@ app:
         seguimiento-facturas: PRC_GET_SEGUIMIENTO_FACTURAS
         doc-factura: PRC_GET_DOC_FACTURA
         detalle-log: PRC_GET_DETALLE_LOG
+        errores-agrupados: PRC_GET_ERRORES_AGRUPADOS
+        duplicados: PRC_GET_DUPLICADOS
+        tiempo-promedio-emision: PRC_GET_TIEMPO_PROMEDIO_EMISION
+        top-productos-fallas: PRC_GET_TOP_PRODUCTOS_FALLAS
 
 management:
   health:

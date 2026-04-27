@@ -16,7 +16,7 @@ import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for LogFacturaService.
- * Requirements: 4.1
+ * Requirements: 5.1
  */
 @ExtendWith(MockitoExtension.class)
 class LogFacturaServiceTest {
@@ -29,7 +29,7 @@ class LogFacturaServiceTest {
 
     @Test
     void getLogs_delegatesToCoreService() {
-        Long numSecuPol = 12345L;
+        String numSecuPol = "12345";
         int page = 0;
         int size = 50;
 

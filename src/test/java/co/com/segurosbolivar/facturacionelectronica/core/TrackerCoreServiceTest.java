@@ -1,6 +1,5 @@
 package co.com.segurosbolivar.facturacionelectronica.core;
 
-import co.com.segurosbolivar.facturacionelectronica.dto.response.PaginatedResponse;
 import co.com.segurosbolivar.facturacionelectronica.repository.TrackerRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,7 +15,7 @@ import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for TrackerCoreService.
- * Requirements: 2.2, 2.4, 2.5
+ * Requirements: 3.5
  */
 @ExtendWith(MockitoExtension.class)
 class TrackerCoreServiceTest {
@@ -28,7 +27,7 @@ class TrackerCoreServiceTest {
     private TrackerCoreService coreService;
 
     @Test
-    void getFacturas_callsRepositoryAndPaginates() {
+    void getFacturas_callsRepositoryAndReturnsResult() {
         LocalDate fechaInicio = LocalDate.of(2024, 1, 1);
         LocalDate fechaFin = LocalDate.of(2024, 12, 31);
 
@@ -36,27 +35,24 @@ class TrackerCoreServiceTest {
                 Map.of("id_int_fac", 1001, "num_poliza", "POL-001", "estado", "PR")
         );
 
-        when(repository.getSeguimientoFacturas("POL-001", fechaInicio, fechaFin))
+        when(repository.getSeguimientoFacturas("POL-001", null, fechaInicio, fechaFin, 1, 50))
                 .thenReturn(rawResult);
 
-        PaginatedResponse<Map<String, Object>> result = coreService.getFacturas("POL-001", fechaInicio, fechaFin, 0, 20);
+        Object result = coreService.getFacturas("POL-001", null, fechaInicio, fechaFin, 1, 50);
 
         assertNotNull(result);
-        assertEquals(1, result.getTotalElements());
-        assertEquals(1, result.getContent().size());
-        assertEquals(1001, result.getContent().get(0).get("id_int_fac"));
-        verify(repository).getSeguimientoFacturas("POL-001", fechaInicio, fechaFin);
+        assertEquals(rawResult, result);
+        verify(repository).getSeguimientoFacturas("POL-001", null, fechaInicio, fechaFin, 1, 50);
     }
 
     @Test
-    void getFacturas_emptyCursor_returnsEmptyPaginatedResponse() {
-        when(repository.getSeguimientoFacturas(null, null, null))
+    void getFacturas_emptyCursor_returnsEmptyList() {
+        when(repository.getSeguimientoFacturas(null, null, null, null, 1, 50))
                 .thenReturn(Collections.emptyList());
 
-        PaginatedResponse<Map<String, Object>> result = coreService.getFacturas(null, null, null, 0, 20);
+        Object result = coreService.getFacturas(null, null, null, null, 1, 50);
 
         assertNotNull(result);
-        assertEquals(0, result.getTotalElements());
-        assertTrue(result.getContent().isEmpty());
+        assertEquals(Collections.emptyList(), result);
     }
 }

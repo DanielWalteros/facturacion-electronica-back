@@ -20,7 +20,7 @@ import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for LogFacturaRepository.
- * Requirements: 4.1
+ * Requirements: 5.1, 5.2
  */
 @ExtendWith(MockitoExtension.class)
 class LogFacturaRepositoryTest {
@@ -45,50 +45,47 @@ class LogFacturaRepositoryTest {
 
     @Test
     void getDetalleLog_buildsCorrectParameterMap() {
-        Long numSecuPol = 12345L;
+        String numSecuPol = "12345";
 
-        when(adapterClient.executeStoredProcedure(anyString(), anyString(), any(), anyString()))
+        when(adapterClient.executeStoredProcedureClob(anyString(), anyString(), any()))
                 .thenReturn(Collections.emptyList());
 
         repository.getDetalleLog(numSecuPol);
 
         @SuppressWarnings("unchecked")
         ArgumentCaptor<Map<String, Object>> paramsCaptor = ArgumentCaptor.forClass(Map.class);
-        verify(adapterClient).executeStoredProcedure(
+        verify(adapterClient).executeStoredProcedureClob(
                 eq("SIM_PCK_FACTURA_ELECTRONICA"),
                 eq("PRC_GET_DETALLE_LOG"),
-                paramsCaptor.capture(),
-                eq(ConstantsUtil.OP_CURSOR)
+                paramsCaptor.capture()
         );
 
         Map<String, Object> params = paramsCaptor.getValue();
-        assertEquals(12345L, params.get(ConstantsUtil.IP_NUM_SECU_POL));
+        assertEquals("12345", params.get(ConstantsUtil.IP_NUM_SECU_POL));
         assertEquals(1, params.size());
     }
 
     @Test
     void getDetalleLog_returnsAdapterClientResult() {
-        Long numSecuPol = 99999L;
+        String numSecuPol = "99999";
 
         List<Map<String, Object>> expectedResult = List.of(
                 Map.of("tipo_operacion", "EMISION", "usuario", "admin")
         );
 
-        when(adapterClient.executeStoredProcedure(
+        when(adapterClient.executeStoredProcedureClob(
                 eq("SIM_PCK_FACTURA_ELECTRONICA"),
                 eq("PRC_GET_DETALLE_LOG"),
-                any(),
-                eq(ConstantsUtil.OP_CURSOR)
+                any()
         )).thenReturn(expectedResult);
 
-        List<Map<String, Object>> result = repository.getDetalleLog(numSecuPol);
+        Object result = repository.getDetalleLog(numSecuPol);
 
         assertEquals(expectedResult, result);
-        verify(adapterClient, times(1)).executeStoredProcedure(
+        verify(adapterClient, times(1)).executeStoredProcedureClob(
                 eq("SIM_PCK_FACTURA_ELECTRONICA"),
                 eq("PRC_GET_DETALLE_LOG"),
-                any(),
-                eq(ConstantsUtil.OP_CURSOR)
+                any()
         );
     }
 }
