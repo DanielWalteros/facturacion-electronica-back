@@ -1,6 +1,5 @@
 package co.com.segurosbolivar.facturacionelectronica.controller;
 
-import co.com.segurosbolivar.facturacionelectronica.dto.response.LogEntryResponse;
 import co.com.segurosbolivar.facturacionelectronica.dto.response.PaginatedResponse;
 import co.com.segurosbolivar.facturacionelectronica.service.LogFacturaService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,6 +9,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/facturacion/logs")
@@ -24,7 +25,7 @@ public class LogFacturaController {
     @ApiResponse(responseCode = "200", description = "Logs obtenidos exitosamente")
     @ApiResponse(responseCode = "400", description = "Parámetro numSecuPol inválido")
     @GetMapping("/{numSecuPol}")
-    public ResponseEntity<PaginatedResponse<LogEntryResponse>> getLogs(
+    public ResponseEntity<PaginatedResponse<Map<String, Object>>> getLogs(
             @Parameter(description = "Número secuencial de póliza", required = true)
             @PathVariable Long numSecuPol,
             @Parameter(description = "Número de página (default 0)")
@@ -32,7 +33,6 @@ public class LogFacturaController {
             @Parameter(description = "Tamaño de página (default 50, max 200)")
             @RequestParam(defaultValue = "50") int size) {
 
-        PaginatedResponse<LogEntryResponse> response = logFacturaService.getLogs(numSecuPol, page, size);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(logFacturaService.getLogs(numSecuPol, page, size));
     }
 }

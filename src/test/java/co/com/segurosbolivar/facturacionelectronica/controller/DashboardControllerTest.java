@@ -1,7 +1,5 @@
 package co.com.segurosbolivar.facturacionelectronica.controller;
 
-import co.com.segurosbolivar.facturacionelectronica.dto.response.DashboardKpiResponse;
-import co.com.segurosbolivar.facturacionelectronica.dto.response.DistribucionEstadoResponse;
 import co.com.segurosbolivar.facturacionelectronica.exception.GlobalExceptionHandler;
 import co.com.segurosbolivar.facturacionelectronica.service.DashboardService;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,9 +12,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -80,19 +78,11 @@ class DashboardControllerTest {
 
     @Test
     void getKpis_validRequest_returns200() throws Exception {
-        DashboardKpiResponse response = DashboardKpiResponse.builder()
-                .polizasEmitidas(150L)
-                .facturasExitosas(120L)
-                .facturasConError(10L)
-                .facturasPendientes(20L)
-                .valorTotalFacturado(BigDecimal.valueOf(5000000))
-                .distribucionEstados(List.of(
-                        DistribucionEstadoResponse.builder()
-                                .estado("PR").descripcionEstado("Procesada").cantidad(120L).build(),
-                        DistribucionEstadoResponse.builder()
-                                .estado("NE").descripcionEstado("Error").cantidad(10L).build()
-                ))
-                .build();
+        List<Map<String, Object>> response = List.of(
+                Map.of("polizasEmitidas", 150, "facturasExitosas", 120,
+                        "facturasConError", 10, "facturasPendientes", 20,
+                        "valorTotalFacturado", 5000000)
+        );
 
         when(dashboardService.getKpis(any(LocalDate.class), any(LocalDate.class)))
                 .thenReturn(response);
@@ -102,12 +92,12 @@ class DashboardControllerTest {
                         .param("fechaFin", "2024-12-31")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.polizasEmitidas").value(150))
-                .andExpect(jsonPath("$.facturasExitosas").value(120))
-                .andExpect(jsonPath("$.facturasConError").value(10))
-                .andExpect(jsonPath("$.facturasPendientes").value(20))
-                .andExpect(jsonPath("$.valorTotalFacturado").value(5000000))
-                .andExpect(jsonPath("$.distribucionEstados").isArray())
-                .andExpect(jsonPath("$.distribucionEstados.length()").value(2));
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].polizasEmitidas").value(150))
+                .andExpect(jsonPath("$[0].facturasExitosas").value(120))
+                .andExpect(jsonPath("$[0].facturasConError").value(10))
+                .andExpect(jsonPath("$[0].facturasPendientes").value(20))
+                .andExpect(jsonPath("$[0].valorTotalFacturado").value(5000000));
     }
 }

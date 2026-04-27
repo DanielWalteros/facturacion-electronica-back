@@ -1,6 +1,5 @@
 package co.com.segurosbolivar.facturacionelectronica.controller;
 
-import co.com.segurosbolivar.facturacionelectronica.dto.response.DocumentoFacturaResponse;
 import co.com.segurosbolivar.facturacionelectronica.exception.GlobalExceptionHandler;
 import co.com.segurosbolivar.facturacionelectronica.exception.ResourceNotFoundException;
 import co.com.segurosbolivar.facturacionelectronica.service.DocumentoFacturaService;
@@ -14,7 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.math.BigDecimal;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
@@ -58,23 +57,18 @@ class DocumentoFacturaControllerTest {
 
     @Test
     void getDocumentoFactura_validDocument_returns200() throws Exception {
-        DocumentoFacturaResponse response = DocumentoFacturaResponse.builder()
-                .idIntFac(12345L)
-                .estado("PR")
-                .cufe("CUFE-ABC-123")
-                .datosFaltantes(null)
-                .codigoMoneda("COP")
-                .primaProv(BigDecimal.valueOf(100000))
-                .importeImpuestosMonLocal(BigDecimal.valueOf(19000))
-                .tasaImpuesto(BigDecimal.valueOf(19))
-                .totalAPagar(BigDecimal.valueOf(119000))
-                .importePrima(BigDecimal.valueOf(100000))
-                .idMvtoFact(67890L)
-                .numPoliza("POL-001")
-                .nombreAdquirente("Juan Perez")
-                .tipoDocAdquirente("CC")
-                .numDocAdquirente("1234567890")
-                .build();
+        Map<String, Object> response = Map.of(
+                "idIntFac", 12345,
+                "estado", "PR",
+                "cufe", "CUFE-ABC-123",
+                "codigoMoneda", "COP",
+                "totalAPagar", 119000,
+                "idMvtoFact", 67890,
+                "numPoliza", "POL-001",
+                "nombreAdquirente", "Juan Perez",
+                "tipoDocAdquirente", "CC",
+                "numDocAdquirente", "1234567890"
+        );
 
         when(documentoFacturaService.getDocumentoFactura(12345L)).thenReturn(response);
 

@@ -1,8 +1,6 @@
 package co.com.segurosbolivar.facturacionelectronica.core;
 
-import co.com.segurosbolivar.facturacionelectronica.dto.response.DocumentoFacturaResponse;
 import co.com.segurosbolivar.facturacionelectronica.exception.ResourceNotFoundException;
-import co.com.segurosbolivar.facturacionelectronica.mapper.DocumentoFacturaMapper;
 import co.com.segurosbolivar.facturacionelectronica.repository.DocumentoFacturaRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,7 +8,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -26,38 +23,26 @@ class DocumentoFacturaCoreServiceTest {
     @Mock
     private DocumentoFacturaRepository repository;
 
-    @Mock
-    private DocumentoFacturaMapper mapper;
-
     @InjectMocks
     private DocumentoFacturaCoreService coreService;
 
     @Test
-    void getDocumentoFactura_callsRepositoryAndMapper() {
+    void getDocumentoFactura_callsRepositoryAndReturnsFirstRow() {
         Long idIntFac = 12345L;
 
         Map<String, Object> row = Map.of(
-                "id_int_fac", 12345L,
+                "id_int_fac", 12345,
                 "estado", "PR",
                 "cufe", "CUFE-123"
         );
         List<Map<String, Object>> rawResult = List.of(row);
 
-        DocumentoFacturaResponse expected = DocumentoFacturaResponse.builder()
-                .idIntFac(12345L)
-                .estado("PR")
-                .cufe("CUFE-123")
-                .totalAPagar(BigDecimal.valueOf(500000))
-                .build();
-
         when(repository.getDocFactura(idIntFac)).thenReturn(rawResult);
-        when(mapper.toDocumentoFactura(row)).thenReturn(expected);
 
-        DocumentoFacturaResponse result = coreService.getDocumentoFactura(idIntFac);
+        Map<String, Object> result = coreService.getDocumentoFactura(idIntFac);
 
-        assertEquals(expected, result);
+        assertEquals(row, result);
         verify(repository).getDocFactura(idIntFac);
-        verify(mapper).toDocumentoFactura(row);
     }
 
     @Test
@@ -71,7 +56,6 @@ class DocumentoFacturaCoreServiceTest {
 
         assertEquals("NOT_FOUND", ex.getCode());
         assertTrue(ex.getMessage().contains("99999"));
-        verifyNoInteractions(mapper);
     }
 
     @Test

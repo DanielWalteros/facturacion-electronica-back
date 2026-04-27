@@ -1,6 +1,5 @@
 package co.com.segurosbolivar.facturacionelectronica.controller;
 
-import co.com.segurosbolivar.facturacionelectronica.dto.response.FacturaResumenResponse;
 import co.com.segurosbolivar.facturacionelectronica.dto.response.PaginatedResponse;
 import co.com.segurosbolivar.facturacionelectronica.service.TrackerService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/facturacion/tracker")
@@ -30,7 +30,7 @@ public class TrackerController {
     @ApiResponse(responseCode = "200", description = "Facturas obtenidas exitosamente")
     @ApiResponse(responseCode = "400", description = "Parámetros de filtro inválidos (fechas desparejadas)")
     @GetMapping("/facturas")
-    public ResponseEntity<PaginatedResponse<FacturaResumenResponse>> getFacturas(
+    public ResponseEntity<PaginatedResponse<Map<String, Object>>> getFacturas(
             @Parameter(description = "Número de póliza (opcional)")
             @RequestParam(required = false) String numPoliza,
             @Parameter(description = "Fecha inicio del rango (yyyy-MM-dd, opcional)")
@@ -42,7 +42,6 @@ public class TrackerController {
             @Parameter(description = "Tamaño de página (default 20, max 100)")
             @RequestParam(defaultValue = "20") int size) {
 
-        PaginatedResponse<FacturaResumenResponse> response = trackerService.getFacturas(numPoliza, fechaInicio, fechaFin, page, size);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(trackerService.getFacturas(numPoliza, fechaInicio, fechaFin, page, size));
     }
 }

@@ -1,6 +1,5 @@
 package co.com.segurosbolivar.facturacionelectronica.controller;
 
-import co.com.segurosbolivar.facturacionelectronica.dto.response.DashboardKpiResponse;
 import co.com.segurosbolivar.facturacionelectronica.service.DashboardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -15,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/facturacion/dashboard")
@@ -25,17 +26,16 @@ public class DashboardController {
     private final DashboardService dashboardService;
 
     @Operation(summary = "Obtener KPIs del dashboard",
-            description = "Retorna indicadores clave de rendimiento y distribución por estado para el rango de fechas especificado")
+            description = "Retorna indicadores clave de rendimiento para el rango de fechas especificado")
     @ApiResponse(responseCode = "200", description = "KPIs obtenidos exitosamente")
     @ApiResponse(responseCode = "400", description = "Parámetros de fecha inválidos o faltantes")
     @GetMapping("/kpis")
-    public ResponseEntity<DashboardKpiResponse> getKpis(
+    public ResponseEntity<List<Map<String, Object>>> getKpis(
             @Parameter(description = "Fecha inicio (yyyy-MM-dd)", required = true)
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fechaInicio,
             @Parameter(description = "Fecha fin (yyyy-MM-dd)", required = true)
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fechaFin) {
 
-        DashboardKpiResponse response = dashboardService.getKpis(fechaInicio, fechaFin);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(dashboardService.getKpis(fechaInicio, fechaFin));
     }
 }

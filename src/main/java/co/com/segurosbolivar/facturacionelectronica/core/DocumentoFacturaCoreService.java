@@ -1,8 +1,6 @@
 package co.com.segurosbolivar.facturacionelectronica.core;
 
-import co.com.segurosbolivar.facturacionelectronica.dto.response.DocumentoFacturaResponse;
 import co.com.segurosbolivar.facturacionelectronica.exception.ResourceNotFoundException;
-import co.com.segurosbolivar.facturacionelectronica.mapper.DocumentoFacturaMapper;
 import co.com.segurosbolivar.facturacionelectronica.repository.DocumentoFacturaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,9 +13,8 @@ import java.util.Map;
 public class DocumentoFacturaCoreService {
 
     private final DocumentoFacturaRepository repository;
-    private final DocumentoFacturaMapper mapper;
 
-    public DocumentoFacturaResponse getDocumentoFactura(Long idIntFac) {
+    public Map<String, Object> getDocumentoFactura(Long idIntFac) {
         List<Map<String, Object>> result = repository.getDocFactura(idIntFac);
 
         if (result == null || result.isEmpty()) {
@@ -27,6 +24,6 @@ public class DocumentoFacturaCoreService {
             );
         }
 
-        return mapper.toDocumentoFactura(result.get(0));
+        return result.get(0);
     }
 }

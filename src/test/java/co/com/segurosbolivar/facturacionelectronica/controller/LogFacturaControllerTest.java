@@ -1,6 +1,5 @@
 package co.com.segurosbolivar.facturacionelectronica.controller;
 
-import co.com.segurosbolivar.facturacionelectronica.dto.response.LogEntryResponse;
 import co.com.segurosbolivar.facturacionelectronica.dto.response.PaginatedResponse;
 import co.com.segurosbolivar.facturacionelectronica.exception.GlobalExceptionHandler;
 import co.com.segurosbolivar.facturacionelectronica.service.LogFacturaService;
@@ -14,9 +13,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
@@ -47,18 +46,16 @@ class LogFacturaControllerTest {
 
     @Test
     void getLogs_validRequest_returns200WithPaginatedLogs() throws Exception {
-        List<LogEntryResponse> content = List.of(
-                LogEntryResponse.builder()
-                        .tipoOperacion("EMISION")
-                        .timestamp(LocalDateTime.of(2024, 6, 15, 10, 30, 0))
-                        .usuario("admin")
-                        .referenciaFactura("FAC-001")
-                        .resultadoOperacion("EXITOSO")
-                        .detalle("Factura emitida correctamente")
-                        .build()
+        List<Map<String, Object>> content = List.of(
+                Map.of("tipoOperacion", "EMISION",
+                        "timestamp", "2024-06-15T10:30:00",
+                        "usuario", "admin",
+                        "referenciaFactura", "FAC-001",
+                        "resultadoOperacion", "EXITOSO",
+                        "detalle", "Factura emitida correctamente")
         );
 
-        PaginatedResponse<LogEntryResponse> response = PaginatedResponse.<LogEntryResponse>builder()
+        PaginatedResponse<Map<String, Object>> response = PaginatedResponse.<Map<String, Object>>builder()
                 .content(content)
                 .totalElements(1)
                 .totalPages(1)
@@ -85,7 +82,7 @@ class LogFacturaControllerTest {
 
     @Test
     void getLogs_emptyCursor_returnsEmptyContent() throws Exception {
-        PaginatedResponse<LogEntryResponse> emptyResponse = PaginatedResponse.<LogEntryResponse>builder()
+        PaginatedResponse<Map<String, Object>> emptyResponse = PaginatedResponse.<Map<String, Object>>builder()
                 .content(Collections.emptyList())
                 .totalElements(0)
                 .totalPages(0)

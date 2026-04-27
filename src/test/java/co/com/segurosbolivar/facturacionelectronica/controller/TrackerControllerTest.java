@@ -1,6 +1,5 @@
 package co.com.segurosbolivar.facturacionelectronica.controller;
 
-import co.com.segurosbolivar.facturacionelectronica.dto.response.FacturaResumenResponse;
 import co.com.segurosbolivar.facturacionelectronica.dto.response.PaginatedResponse;
 import co.com.segurosbolivar.facturacionelectronica.exception.GlobalExceptionHandler;
 import co.com.segurosbolivar.facturacionelectronica.service.TrackerService;
@@ -14,10 +13,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
@@ -61,21 +59,14 @@ class TrackerControllerTest {
 
     @Test
     void getFacturas_validRequest_returns200WithPaginatedResponse() throws Exception {
-        List<FacturaResumenResponse> content = List.of(
-                FacturaResumenResponse.builder()
-                        .idIntFac(1001L)
-                        .numPoliza("POL-001")
-                        .fecha("2024-06-15")
-                        .estado("PR")
-                        .descripcionEstado("Procesada")
-                        .totalAPagar(BigDecimal.valueOf(150000))
-                        .tipoDocAdquirente("CC")
-                        .numDocAdquirente("123456789")
-                        .nombreAdquirente("Juan Perez")
-                        .build()
+        List<Map<String, Object>> content = List.of(
+                Map.of("idIntFac", 1001, "numPoliza", "POL-001", "fecha", "2024-06-15",
+                        "estado", "PR", "descripcionEstado", "Procesada",
+                        "totalAPagar", 150000, "tipoDocAdquirente", "CC",
+                        "numDocAdquirente", "123456789", "nombreAdquirente", "Juan Perez")
         );
 
-        PaginatedResponse<FacturaResumenResponse> response = PaginatedResponse.<FacturaResumenResponse>builder()
+        PaginatedResponse<Map<String, Object>> response = PaginatedResponse.<Map<String, Object>>builder()
                 .content(content)
                 .totalElements(1)
                 .totalPages(1)
@@ -104,7 +95,7 @@ class TrackerControllerTest {
 
     @Test
     void getFacturas_emptyCursor_returnsEmptyContent() throws Exception {
-        PaginatedResponse<FacturaResumenResponse> emptyResponse = PaginatedResponse.<FacturaResumenResponse>builder()
+        PaginatedResponse<Map<String, Object>> emptyResponse = PaginatedResponse.<Map<String, Object>>builder()
                 .content(Collections.emptyList())
                 .totalElements(0)
                 .totalPages(0)
@@ -125,7 +116,7 @@ class TrackerControllerTest {
 
     @Test
     void getFacturas_allNullFilters_returns200() throws Exception {
-        PaginatedResponse<FacturaResumenResponse> response = PaginatedResponse.<FacturaResumenResponse>builder()
+        PaginatedResponse<Map<String, Object>> response = PaginatedResponse.<Map<String, Object>>builder()
                 .content(Collections.emptyList())
                 .totalElements(0)
                 .totalPages(0)

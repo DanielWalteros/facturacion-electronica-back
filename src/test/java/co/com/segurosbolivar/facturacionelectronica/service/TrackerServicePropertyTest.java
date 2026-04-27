@@ -1,7 +1,6 @@
 package co.com.segurosbolivar.facturacionelectronica.service;
 
 import co.com.segurosbolivar.facturacionelectronica.core.TrackerCoreService;
-import co.com.segurosbolivar.facturacionelectronica.dto.response.FacturaResumenResponse;
 import co.com.segurosbolivar.facturacionelectronica.dto.response.PaginatedResponse;
 import net.jqwik.api.*;
 import org.junit.jupiter.api.Tag;
@@ -9,6 +8,7 @@ import org.mockito.Mockito;
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
@@ -54,7 +54,7 @@ class TrackerServicePropertyTest {
         LocalDate fechaInicio = datePair[0];
         LocalDate fechaFin = datePair[1];
 
-        PaginatedResponse<FacturaResumenResponse> mockResponse = PaginatedResponse.<FacturaResumenResponse>builder()
+        PaginatedResponse<Map<String, Object>> mockResponse = PaginatedResponse.<Map<String, Object>>builder()
                 .content(Collections.emptyList())
                 .totalElements(0)
                 .totalPages(0)
@@ -67,7 +67,7 @@ class TrackerServicePropertyTest {
 
         // Both provided or both null → must NOT throw
         try {
-            PaginatedResponse<FacturaResumenResponse> result = trackerService.getFacturas(null, fechaInicio, fechaFin, 0, 20);
+            PaginatedResponse<Map<String, Object>> result = trackerService.getFacturas(null, fechaInicio, fechaFin, 0, 20);
             assert result != null : "Result must not be null for valid date combination";
         } catch (IllegalArgumentException e) {
             assert false : "Should NOT throw IllegalArgumentException when both dates are "

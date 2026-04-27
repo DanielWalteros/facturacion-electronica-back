@@ -1,14 +1,14 @@
 package co.com.segurosbolivar.facturacionelectronica.service;
 
 import co.com.segurosbolivar.facturacionelectronica.core.DashboardCoreService;
-import co.com.segurosbolivar.facturacionelectronica.dto.response.DashboardKpiResponse;
 import net.jqwik.api.*;
 import org.junit.jupiter.api.Tag;
 import org.mockito.Mockito;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -53,19 +53,12 @@ class DashboardServicePropertyTest {
         LocalDate fechaFin = datePair[1];
 
         // Mock coreService to return a valid response
-        DashboardKpiResponse mockResponse = DashboardKpiResponse.builder()
-                .polizasEmitidas(0L)
-                .facturasExitosas(0L)
-                .facturasConError(0L)
-                .facturasPendientes(0L)
-                .valorTotalFacturado(BigDecimal.ZERO)
-                .distribucionEstados(Collections.emptyList())
-                .build();
+        List<Map<String, Object>> mockResponse = Collections.emptyList();
         when(coreService.getKpis(any(LocalDate.class), any(LocalDate.class))).thenReturn(mockResponse);
 
         // fechaInicio <= fechaFin must NOT throw
         try {
-            DashboardKpiResponse result = dashboardService.getKpis(fechaInicio, fechaFin);
+            List<Map<String, Object>> result = dashboardService.getKpis(fechaInicio, fechaFin);
             assert result != null : "Result must not be null for valid date range";
         } catch (IllegalArgumentException e) {
             assert false : "Should NOT throw IllegalArgumentException for fechaInicio=" + fechaInicio

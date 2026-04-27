@@ -1,16 +1,16 @@
 package co.com.segurosbolivar.facturacionelectronica.service;
 
 import co.com.segurosbolivar.facturacionelectronica.core.DashboardCoreService;
-import co.com.segurosbolivar.facturacionelectronica.dto.response.DashboardKpiResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -45,18 +45,15 @@ class DashboardServiceTest {
         LocalDate fechaInicio = LocalDate.of(2024, 1, 1);
         LocalDate fechaFin = LocalDate.of(2024, 12, 31);
 
-        DashboardKpiResponse expected = DashboardKpiResponse.builder()
-                .polizasEmitidas(100L)
-                .facturasExitosas(80L)
-                .facturasConError(10L)
-                .facturasPendientes(10L)
-                .valorTotalFacturado(BigDecimal.valueOf(1000000))
-                .distribucionEstados(Collections.emptyList())
-                .build();
+        List<Map<String, Object>> expected = List.of(
+                Map.of("polizasEmitidas", 100, "facturasExitosas", 80,
+                        "facturasConError", 10, "facturasPendientes", 10,
+                        "valorTotalFacturado", 1000000)
+        );
 
         when(coreService.getKpis(fechaInicio, fechaFin)).thenReturn(expected);
 
-        DashboardKpiResponse result = dashboardService.getKpis(fechaInicio, fechaFin);
+        List<Map<String, Object>> result = dashboardService.getKpis(fechaInicio, fechaFin);
 
         assertEquals(expected, result);
         verify(coreService).getKpis(fechaInicio, fechaFin);
@@ -66,18 +63,11 @@ class DashboardServiceTest {
     void getKpis_sameDates_doesNotThrow() {
         LocalDate sameDate = LocalDate.of(2024, 6, 15);
 
-        DashboardKpiResponse expected = DashboardKpiResponse.builder()
-                .polizasEmitidas(0L)
-                .facturasExitosas(0L)
-                .facturasConError(0L)
-                .facturasPendientes(0L)
-                .valorTotalFacturado(BigDecimal.ZERO)
-                .distribucionEstados(Collections.emptyList())
-                .build();
+        List<Map<String, Object>> expected = Collections.emptyList();
 
         when(coreService.getKpis(sameDate, sameDate)).thenReturn(expected);
 
-        DashboardKpiResponse result = dashboardService.getKpis(sameDate, sameDate);
+        List<Map<String, Object>> result = dashboardService.getKpis(sameDate, sameDate);
 
         assertNotNull(result);
         verify(coreService).getKpis(sameDate, sameDate);

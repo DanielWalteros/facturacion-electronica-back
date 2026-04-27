@@ -1,7 +1,6 @@
 package co.com.segurosbolivar.facturacionelectronica.service;
 
 import co.com.segurosbolivar.facturacionelectronica.core.LogFacturaCoreService;
-import co.com.segurosbolivar.facturacionelectronica.dto.response.LogEntryResponse;
 import co.com.segurosbolivar.facturacionelectronica.dto.response.PaginatedResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,8 +8,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -34,13 +33,11 @@ class LogFacturaServiceTest {
         int page = 0;
         int size = 50;
 
-        PaginatedResponse<LogEntryResponse> expected = PaginatedResponse.<LogEntryResponse>builder()
+        PaginatedResponse<Map<String, Object>> expected = PaginatedResponse.<Map<String, Object>>builder()
                 .content(List.of(
-                        LogEntryResponse.builder()
-                                .tipoOperacion("EMISION")
-                                .timestamp(LocalDateTime.of(2024, 6, 15, 10, 30, 0))
-                                .usuario("admin")
-                                .build()
+                        Map.of("tipoOperacion", "EMISION",
+                                "timestamp", "2024-06-15T10:30:00",
+                                "usuario", "admin")
                 ))
                 .totalElements(1)
                 .totalPages(1)
@@ -50,7 +47,7 @@ class LogFacturaServiceTest {
 
         when(coreService.getLogs(numSecuPol, page, size)).thenReturn(expected);
 
-        PaginatedResponse<LogEntryResponse> result = logFacturaService.getLogs(numSecuPol, page, size);
+        PaginatedResponse<Map<String, Object>> result = logFacturaService.getLogs(numSecuPol, page, size);
 
         assertEquals(expected, result);
         verify(coreService).getLogs(numSecuPol, page, size);

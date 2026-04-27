@@ -1,6 +1,5 @@
 package co.com.segurosbolivar.facturacionelectronica.controller;
 
-import co.com.segurosbolivar.facturacionelectronica.dto.response.DocumentoFacturaResponse;
 import co.com.segurosbolivar.facturacionelectronica.service.DocumentoFacturaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +11,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/facturacion/facturas")
@@ -27,11 +28,10 @@ public class DocumentoFacturaController {
     @ApiResponse(responseCode = "404", description = "Documento de factura no encontrado")
     @ApiResponse(responseCode = "400", description = "ID de factura inválido")
     @GetMapping("/{idIntFac}")
-    public ResponseEntity<DocumentoFacturaResponse> getDocumentoFactura(
+    public ResponseEntity<Map<String, Object>> getDocumentoFactura(
             @Parameter(description = "ID interno de factura", required = true)
             @PathVariable Long idIntFac) {
 
-        DocumentoFacturaResponse response = documentoFacturaService.getDocumentoFactura(idIntFac);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(documentoFacturaService.getDocumentoFactura(idIntFac));
     }
 }

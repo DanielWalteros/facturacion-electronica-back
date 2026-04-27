@@ -1,7 +1,6 @@
 package co.com.segurosbolivar.facturacionelectronica.service;
 
 import co.com.segurosbolivar.facturacionelectronica.core.TrackerCoreService;
-import co.com.segurosbolivar.facturacionelectronica.dto.response.FacturaResumenResponse;
 import co.com.segurosbolivar.facturacionelectronica.dto.response.PaginatedResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -55,7 +55,7 @@ class TrackerServiceTest {
         LocalDate fechaInicio = LocalDate.of(2024, 1, 1);
         LocalDate fechaFin = LocalDate.of(2024, 12, 31);
 
-        PaginatedResponse<FacturaResumenResponse> expected = PaginatedResponse.<FacturaResumenResponse>builder()
+        PaginatedResponse<Map<String, Object>> expected = PaginatedResponse.<Map<String, Object>>builder()
                 .content(Collections.emptyList())
                 .totalElements(0)
                 .totalPages(0)
@@ -66,7 +66,7 @@ class TrackerServiceTest {
         when(coreService.getFacturas("POL-001", fechaInicio, fechaFin, 0, 20))
                 .thenReturn(expected);
 
-        PaginatedResponse<FacturaResumenResponse> result = trackerService.getFacturas("POL-001", fechaInicio, fechaFin, 0, 20);
+        PaginatedResponse<Map<String, Object>> result = trackerService.getFacturas("POL-001", fechaInicio, fechaFin, 0, 20);
 
         assertEquals(expected, result);
         verify(coreService).getFacturas("POL-001", fechaInicio, fechaFin, 0, 20);
@@ -74,7 +74,7 @@ class TrackerServiceTest {
 
     @Test
     void getFacturas_bothDatesNull_delegatesToCoreService() {
-        PaginatedResponse<FacturaResumenResponse> expected = PaginatedResponse.<FacturaResumenResponse>builder()
+        PaginatedResponse<Map<String, Object>> expected = PaginatedResponse.<Map<String, Object>>builder()
                 .content(Collections.emptyList())
                 .totalElements(0)
                 .totalPages(0)
@@ -85,7 +85,7 @@ class TrackerServiceTest {
         when(coreService.getFacturas(null, null, null, 0, 20))
                 .thenReturn(expected);
 
-        PaginatedResponse<FacturaResumenResponse> result = trackerService.getFacturas(null, null, null, 0, 20);
+        PaginatedResponse<Map<String, Object>> result = trackerService.getFacturas(null, null, null, 0, 20);
 
         assertEquals(expected, result);
         verify(coreService).getFacturas(null, null, null, 0, 20);
