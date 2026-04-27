@@ -1,8 +1,8 @@
 {
 	"info": {
-		"_postman_id": "fe-consulta-api-v1",
-		"name": "Facturación Electrónica Consulta API",
-		"description": "Colección de Postman para el microservicio de consulta de facturación electrónica de Seguros Bolívar.\n\nEndpoints REST que consumen procedimientos almacenados del paquete Oracle SIM_PCK_FACTURA_ELECTRONICA a través del patrón Adapter V3.\n\n**Base URL:** `http://localhost:8080/facturacion-electronica`\n\n**Módulos:**\n- Dashboard: KPIs y métricas agregadas\n- Tracker: Búsqueda y seguimiento de facturas\n- Documento Factura: Detalle completo de factura\n- Logs: Historial de trazabilidad por póliza",
+		"_postman_id": "fe-consulta-api-v2",
+		"name": "Facturación Electrónica Consulta API V2",
+		"description": "Colección de Postman para el microservicio de consulta de facturación electrónica de Seguros Bolívar (V2).\n\nEndpoints REST que consumen procedimientos almacenados del paquete Oracle SIM_PCK_FACTURA_ELECTRONICA a través del patrón Adapter V3.\n\nV2 migra al nuevo patrón de salida CLOB (OP_DATA/OP_RESULTADO/OP_ARRERRORES) e incorpora 4 nuevos endpoints analíticos.\n\n**Base URL:** `http://localhost:8080/facturacion-electronica`\n\n**Módulos:**\n- Dashboard: KPIs, errores agrupados, duplicados, tiempo promedio emisión, top productos fallas\n- Tracker: Búsqueda y seguimiento de facturas (paginación server-side)\n- Documento Factura: Detalle completo de factura\n- Logs: Historial de trazabilidad por póliza (paginación client-side)",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"variable": [
@@ -15,17 +15,14 @@
 	"item": [
 		{
 			"name": "Dashboard",
-			"description": "KPIs y métricas de facturación electrónica (PRC_GET_DASHBOARD_KPIS)",
+			"description": "KPIs y métricas analíticas de facturación electrónica",
 			"item": [
 				{
 					"name": "Obtener KPIs del Dashboard",
 					"request": {
 						"method": "GET",
 						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
+							{ "key": "Accept", "value": "application/json" }
 						],
 						"url": {
 							"raw": "{{baseUrl}}/api/v1/facturacion/dashboard/kpis?fechaInicio=2025-01-01&fechaFin=2025-12-31",
@@ -44,7 +41,7 @@
 								}
 							]
 						},
-						"description": "Retorna indicadores clave de rendimiento y distribución por estado para el rango de fechas especificado.\n\n**SP:** PRC_GET_DASHBOARD_KPIS(IP_FECHA_INICIO, IP_FECHA_FIN, OP_CURSOR)"
+						"description": "Retorna indicadores clave de rendimiento y distribución por estado para el rango de fechas especificado.\n\n**SP:** PRC_GET_DASHBOARD_KPIS(IP_FECHA_INICIO, IP_FECHA_FIN, OP_DATA, OP_RESULTADO, OP_ARRERRORES)"
 					},
 					"response": [
 						{
@@ -88,8 +85,9 @@
 						}
 					]
 				},
+
 				{
-					"name": "KPIs - Sin datos (cursor vacío)",
+					"name": "KPIs - Sin datos (OP_DATA vacío)",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -119,29 +117,307 @@
 					]
 				},
 				{
-					"name": "KPIs - Error: fechaInicio > fechaFin",
+					"name": "Obtener Errores Agrupados",
 					"request": {
 						"method": "GET",
 						"header": [
 							{ "key": "Accept", "value": "application/json" }
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/facturacion/dashboard/kpis?fechaInicio=2025-12-31&fechaFin=2025-01-01",
+							"raw": "{{baseUrl}}/api/v1/facturacion/dashboard/errores-agrupados?fechaInicio=2025-01-01&fechaFin=2025-12-31",
 							"host": ["{{baseUrl}}"],
-							"path": ["api", "v1", "facturacion", "dashboard", "kpis"],
+							"path": ["api", "v1", "facturacion", "dashboard", "errores-agrupados"],
 							"query": [
-								{ "key": "fechaInicio", "value": "2025-12-31" },
-								{ "key": "fechaFin", "value": "2025-01-01" }
+								{
+									"key": "fechaInicio",
+									"value": "2025-01-01",
+									"description": "Fecha inicio del rango (yyyy-MM-dd) - Requerido"
+								},
+								{
+									"key": "fechaFin",
+									"value": "2025-12-31",
+									"description": "Fecha fin del rango (yyyy-MM-dd) - Requerido"
+								}
 							]
 						},
-						"description": "Ejemplo de error: fecha inicio posterior a fecha fin."
+						"description": "Retorna los errores de facturación agrupados por tipo para el rango de fechas especificado.\n\n**SP:** PRC_GET_ERRORES_AGRUPADOS(IP_FECHA_INICIO, IP_FECHA_FIN, OP_DATA, OP_RESULTADO, OP_ARRERRORES)"
+					},
+					"response": [
+						{
+							"name": "200 - Errores agrupados obtenidos",
+							"status": "OK",
+							"code": 200,
+							"header": [
+								{ "key": "Content-Type", "value": "application/json" }
+							],
+							"body": "[\n  {\n    \"codigo_error\": \"ERR001\",\n    \"descripcion\": \"Timeout DIAN\",\n    \"cantidad\": 45\n  },\n  {\n    \"codigo_error\": \"ERR002\",\n    \"descripcion\": \"NIT inválido\",\n    \"cantidad\": 23\n  },\n  {\n    \"codigo_error\": \"ERR003\",\n    \"descripcion\": \"CUFE duplicado\",\n    \"cantidad\": 12\n  }\n]"
+						},
+						{
+							"name": "200 - Sin errores en el rango",
+							"status": "OK",
+							"code": 200,
+							"header": [
+								{ "key": "Content-Type", "value": "application/json" }
+							],
+							"body": "[]"
+						},
+						{
+							"name": "400 - Fechas faltantes",
+							"status": "Bad Request",
+							"code": 400,
+							"header": [
+								{ "key": "Content-Type", "value": "application/json" }
+							],
+							"body": "{\n  \"codigo\": \"VALIDATION_ERROR\",\n  \"mensaje\": \"Required request parameter 'fechaInicio' for method parameter type LocalDate is not present\",\n  \"tipoError\": \"NEGOCIO\",\n  \"timestamp\": \"2025-06-15T10:30:00\"\n}"
+						},
+						{
+							"name": "400 - Rango de fechas inválido",
+							"status": "Bad Request",
+							"code": 400,
+							"header": [
+								{ "key": "Content-Type", "value": "application/json" }
+							],
+							"body": "{\n  \"codigo\": \"VALIDATION_ERROR\",\n  \"mensaje\": \"La fecha de inicio debe ser anterior o igual a la fecha fin\",\n  \"tipoError\": \"NEGOCIO\",\n  \"timestamp\": \"2025-06-15T10:30:00\"\n}"
+						}
+					]
+				},
+
+				{
+					"name": "Obtener Facturas Duplicadas",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/facturacion/dashboard/duplicados?fechaInicio=2025-01-01&fechaFin=2025-12-31",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "facturacion", "dashboard", "duplicados"],
+							"query": [
+								{
+									"key": "fechaInicio",
+									"value": "2025-01-01",
+									"description": "Fecha inicio del rango (yyyy-MM-dd) - Requerido"
+								},
+								{
+									"key": "fechaFin",
+									"value": "2025-12-31",
+									"description": "Fecha fin del rango (yyyy-MM-dd) - Requerido"
+								}
+							]
+						},
+						"description": "Retorna las facturas electrónicas duplicadas detectadas para el rango de fechas especificado.\n\n**SP:** PRC_GET_DUPLICADOS(IP_FECHA_INICIO, IP_FECHA_FIN, OP_DATA, OP_RESULTADO, OP_ARRERRORES)"
+					},
+					"response": [
+						{
+							"name": "200 - Duplicados encontrados",
+							"status": "OK",
+							"code": 200,
+							"header": [
+								{ "key": "Content-Type", "value": "application/json" }
+							],
+							"body": "[\n  {\n    \"idIntFac\": 100001,\n    \"numPoliza\": \"POL-2025-001\",\n    \"numDocAdquirente\": \"900123456\",\n    \"totalAPagar\": 1250000.00,\n    \"fecha\": \"2025-03-15\",\n    \"cantidadDuplicados\": 2\n  },\n  {\n    \"idIntFac\": 100050,\n    \"numPoliza\": \"POL-2025-050\",\n    \"numDocAdquirente\": \"800987654\",\n    \"totalAPagar\": 850000.00,\n    \"fecha\": \"2025-04-20\",\n    \"cantidadDuplicados\": 3\n  }\n]"
+						},
+						{
+							"name": "200 - Sin duplicados",
+							"status": "OK",
+							"code": 200,
+							"header": [
+								{ "key": "Content-Type", "value": "application/json" }
+							],
+							"body": "[]"
+						},
+						{
+							"name": "400 - Fechas faltantes",
+							"status": "Bad Request",
+							"code": 400,
+							"header": [
+								{ "key": "Content-Type", "value": "application/json" }
+							],
+							"body": "{\n  \"codigo\": \"VALIDATION_ERROR\",\n  \"mensaje\": \"Required request parameter 'fechaInicio' for method parameter type LocalDate is not present\",\n  \"tipoError\": \"NEGOCIO\",\n  \"timestamp\": \"2025-06-15T10:30:00\"\n}"
+						},
+						{
+							"name": "400 - Rango de fechas inválido",
+							"status": "Bad Request",
+							"code": 400,
+							"header": [
+								{ "key": "Content-Type", "value": "application/json" }
+							],
+							"body": "{\n  \"codigo\": \"VALIDATION_ERROR\",\n  \"mensaje\": \"La fecha de inicio debe ser anterior o igual a la fecha fin\",\n  \"tipoError\": \"NEGOCIO\",\n  \"timestamp\": \"2025-06-15T10:30:00\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Obtener Tiempo Promedio de Emisión",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/facturacion/dashboard/tiempo-promedio-emision?fechaInicio=2025-01-01&fechaFin=2025-12-31",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "facturacion", "dashboard", "tiempo-promedio-emision"],
+							"query": [
+								{
+									"key": "fechaInicio",
+									"value": "2025-01-01",
+									"description": "Fecha inicio del rango (yyyy-MM-dd) - Requerido"
+								},
+								{
+									"key": "fechaFin",
+									"value": "2025-12-31",
+									"description": "Fecha fin del rango (yyyy-MM-dd) - Requerido"
+								}
+							]
+						},
+						"description": "Retorna el tiempo promedio de emisión de facturas electrónicas para el rango de fechas especificado.\n\n**SP:** PRC_GET_TIEMPO_PROMEDIO_EMISION(IP_FECHA_INICIO, IP_FECHA_FIN, OP_DATA, OP_RESULTADO, OP_ARRERRORES)"
+					},
+					"response": [
+						{
+							"name": "200 - Tiempo promedio obtenido",
+							"status": "OK",
+							"code": 200,
+							"header": [
+								{ "key": "Content-Type", "value": "application/json" }
+							],
+							"body": "{\n  \"tiempoPromedioMinutos\": 12.5,\n  \"tiempoMinimoMinutos\": 2.1,\n  \"tiempoMaximoMinutos\": 45.3,\n  \"totalFacturasProcesadas\": 980\n}"
+						},
+						{
+							"name": "200 - Sin datos (valores en cero)",
+							"status": "OK",
+							"code": 200,
+							"header": [
+								{ "key": "Content-Type", "value": "application/json" }
+							],
+							"body": "{\n  \"tiempoPromedioMinutos\": 0,\n  \"tiempoMinimoMinutos\": 0,\n  \"tiempoMaximoMinutos\": 0,\n  \"totalFacturasProcesadas\": 0\n}"
+						},
+						{
+							"name": "400 - Fechas faltantes",
+							"status": "Bad Request",
+							"code": 400,
+							"header": [
+								{ "key": "Content-Type", "value": "application/json" }
+							],
+							"body": "{\n  \"codigo\": \"VALIDATION_ERROR\",\n  \"mensaje\": \"Required request parameter 'fechaInicio' for method parameter type LocalDate is not present\",\n  \"tipoError\": \"NEGOCIO\",\n  \"timestamp\": \"2025-06-15T10:30:00\"\n}"
+						},
+						{
+							"name": "400 - Rango de fechas inválido",
+							"status": "Bad Request",
+							"code": 400,
+							"header": [
+								{ "key": "Content-Type", "value": "application/json" }
+							],
+							"body": "{\n  \"codigo\": \"VALIDATION_ERROR\",\n  \"mensaje\": \"La fecha de inicio debe ser anterior o igual a la fecha fin\",\n  \"tipoError\": \"NEGOCIO\",\n  \"timestamp\": \"2025-06-15T10:30:00\"\n}"
+						}
+					]
+				},
+
+				{
+					"name": "Obtener Top Productos con Fallas",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/facturacion/dashboard/top-productos-fallas?fechaInicio=2025-01-01&fechaFin=2025-12-31&topN=5",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "facturacion", "dashboard", "top-productos-fallas"],
+							"query": [
+								{
+									"key": "fechaInicio",
+									"value": "2025-01-01",
+									"description": "Fecha inicio del rango (yyyy-MM-dd) - Requerido"
+								},
+								{
+									"key": "fechaFin",
+									"value": "2025-12-31",
+									"description": "Fecha fin del rango (yyyy-MM-dd) - Requerido"
+								},
+								{
+									"key": "topN",
+									"value": "5",
+									"description": "Cantidad de productos a retornar (default 5, debe ser > 0)"
+								}
+							]
+						},
+						"description": "Retorna los productos con mayor cantidad de fallas en facturación electrónica para el rango de fechas especificado.\n\n**SP:** PRC_GET_TOP_PRODUCTOS_FALLAS(IP_FECHA_INICIO, IP_FECHA_FIN, IP_TOP_N, OP_DATA, OP_RESULTADO, OP_ARRERRORES)"
+					},
+					"response": [
+						{
+							"name": "200 - Top productos obtenidos",
+							"status": "OK",
+							"code": 200,
+							"header": [
+								{ "key": "Content-Type", "value": "application/json" }
+							],
+							"body": "[\n  {\n    \"codigoProducto\": \"PROD-001\",\n    \"nombreProducto\": \"Seguro de Vida Individual\",\n    \"cantidadFallas\": 25\n  },\n  {\n    \"codigoProducto\": \"PROD-002\",\n    \"nombreProducto\": \"Seguro Vehicular\",\n    \"cantidadFallas\": 18\n  },\n  {\n    \"codigoProducto\": \"PROD-003\",\n    \"nombreProducto\": \"Seguro de Hogar\",\n    \"cantidadFallas\": 12\n  },\n  {\n    \"codigoProducto\": \"PROD-004\",\n    \"nombreProducto\": \"Seguro SOAT\",\n    \"cantidadFallas\": 8\n  },\n  {\n    \"codigoProducto\": \"PROD-005\",\n    \"nombreProducto\": \"Seguro de Salud\",\n    \"cantidadFallas\": 5\n  }\n]"
+						},
+						{
+							"name": "200 - Sin fallas en el rango",
+							"status": "OK",
+							"code": 200,
+							"header": [
+								{ "key": "Content-Type", "value": "application/json" }
+							],
+							"body": "[]"
+						},
+						{
+							"name": "400 - topN inválido",
+							"status": "Bad Request",
+							"code": 400,
+							"header": [
+								{ "key": "Content-Type", "value": "application/json" }
+							],
+							"body": "{\n  \"codigo\": \"VALIDATION_ERROR\",\n  \"mensaje\": \"El valor de topN debe ser un entero positivo\",\n  \"tipoError\": \"NEGOCIO\",\n  \"timestamp\": \"2025-06-15T10:30:00\"\n}"
+						},
+						{
+							"name": "400 - Fechas faltantes",
+							"status": "Bad Request",
+							"code": 400,
+							"header": [
+								{ "key": "Content-Type", "value": "application/json" }
+							],
+							"body": "{\n  \"codigo\": \"VALIDATION_ERROR\",\n  \"mensaje\": \"Required request parameter 'fechaInicio' for method parameter type LocalDate is not present\",\n  \"tipoError\": \"NEGOCIO\",\n  \"timestamp\": \"2025-06-15T10:30:00\"\n}"
+						},
+						{
+							"name": "400 - Rango de fechas inválido",
+							"status": "Bad Request",
+							"code": 400,
+							"header": [
+								{ "key": "Content-Type", "value": "application/json" }
+							],
+							"body": "{\n  \"codigo\": \"VALIDATION_ERROR\",\n  \"mensaje\": \"La fecha de inicio debe ser anterior o igual a la fecha fin\",\n  \"tipoError\": \"NEGOCIO\",\n  \"timestamp\": \"2025-06-15T10:30:00\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Top Productos - Con topN=10",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/facturacion/dashboard/top-productos-fallas?fechaInicio=2025-01-01&fechaFin=2025-06-30&topN=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "facturacion", "dashboard", "top-productos-fallas"],
+							"query": [
+								{ "key": "fechaInicio", "value": "2025-01-01" },
+								{ "key": "fechaFin", "value": "2025-06-30" },
+								{ "key": "topN", "value": "10" }
+							]
+						},
+						"description": "Ejemplo con topN=10 para obtener los 10 productos con más fallas."
 					}
 				}
 			]
 		},
+
 		{
 			"name": "Tracker",
-			"description": "Búsqueda y seguimiento de facturas (PRC_GET_SEGUIMIENTO_FACTURAS)",
+			"description": "Búsqueda y seguimiento de facturas con paginación server-side (PRC_GET_SEGUIMIENTO_FACTURAS)",
 			"item": [
 				{
 					"name": "Buscar facturas - Sin filtros",
@@ -151,25 +427,25 @@
 							{ "key": "Accept", "value": "application/json" }
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/facturacion/tracker/facturas?page=0&size=20",
+							"raw": "{{baseUrl}}/api/v1/facturacion/tracker/facturas?pagina=1&tamano=50",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "v1", "facturacion", "tracker", "facturas"],
 							"query": [
-								{ "key": "page", "value": "0", "description": "Número de página (default 0)" },
-								{ "key": "size", "value": "20", "description": "Tamaño de página (default 20, max 100)" }
+								{ "key": "pagina", "value": "1", "description": "Número de página (default 1, 1-based para SP)" },
+								{ "key": "tamano", "value": "50", "description": "Tamaño de página (default 50)" }
 							]
 						},
-						"description": "Retorna todas las facturas sin filtros, con paginación por defecto.\n\n**SP:** PRC_GET_SEGUIMIENTO_FACTURAS(NULL, NULL, NULL, OP_CURSOR)"
+						"description": "Retorna todas las facturas sin filtros, con paginación server-side por defecto.\n\n**SP:** PRC_GET_SEGUIMIENTO_FACTURAS(NULL, NULL, NULL, NULL, IP_PAGINA, IP_TAMANO, OP_DATA, OP_RESULTADO, OP_ARRERRORES)"
 					},
 					"response": [
 						{
-							"name": "200 - Facturas paginadas",
+							"name": "200 - Facturas paginadas (server-side)",
 							"status": "OK",
 							"code": 200,
 							"header": [
 								{ "key": "Content-Type", "value": "application/json" }
 							],
-							"body": "{\n  \"content\": [\n    {\n      \"idIntFac\": 100001,\n      \"numPoliza\": \"POL-2025-001\",\n      \"fecha\": \"2025-03-15\",\n      \"estado\": \"PR\",\n      \"descripcionEstado\": \"Procesada\",\n      \"totalAPagar\": 1250000.00,\n      \"tipoDocAdquirente\": \"NIT\",\n      \"numDocAdquirente\": \"900123456\",\n      \"nombreAdquirente\": \"Empresa ABC S.A.S.\"\n    },\n    {\n      \"idIntFac\": 100002,\n      \"numPoliza\": \"POL-2025-002\",\n      \"fecha\": \"2025-03-16\",\n      \"estado\": \"NE\",\n      \"descripcionEstado\": \"No Exitosa\",\n      \"totalAPagar\": 850000.00,\n      \"tipoDocAdquirente\": \"CC\",\n      \"numDocAdquirente\": \"1234567890\",\n      \"nombreAdquirente\": \"Juan Pérez\"\n    }\n  ],\n  \"totalElements\": 150,\n  \"totalPages\": 8,\n  \"currentPage\": 0,\n  \"pageSize\": 20\n}"
+							"body": "{\n  \"content\": [\n    {\n      \"idIntFac\": 100001,\n      \"numPoliza\": \"POL-2025-001\",\n      \"fecha\": \"2025-03-15\",\n      \"estado\": \"PR\",\n      \"descripcionEstado\": \"Procesada\",\n      \"totalAPagar\": 1250000.00,\n      \"tipoDocAdquirente\": \"NIT\",\n      \"numDocAdquirente\": \"900123456\",\n      \"nombreAdquirente\": \"Empresa ABC S.A.S.\"\n    },\n    {\n      \"idIntFac\": 100002,\n      \"numPoliza\": \"POL-2025-002\",\n      \"fecha\": \"2025-03-16\",\n      \"estado\": \"NE\",\n      \"descripcionEstado\": \"No Exitosa\",\n      \"totalAPagar\": 850000.00,\n      \"tipoDocAdquirente\": \"CC\",\n      \"numDocAdquirente\": \"1234567890\",\n      \"nombreAdquirente\": \"Juan Pérez\"\n    }\n  ],\n  \"totalElements\": 150,\n  \"totalPages\": 3,\n  \"currentPage\": 1,\n  \"pageSize\": 50\n}"
 						}
 					]
 				},
@@ -181,16 +457,36 @@
 							{ "key": "Accept", "value": "application/json" }
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/facturacion/tracker/facturas?numPoliza=POL-2025-001&page=0&size=20",
+							"raw": "{{baseUrl}}/api/v1/facturacion/tracker/facturas?numPoliza=POL-2025-001&pagina=1&tamano=50",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "v1", "facturacion", "tracker", "facturas"],
 							"query": [
 								{ "key": "numPoliza", "value": "POL-2025-001", "description": "Número de póliza (opcional)" },
-								{ "key": "page", "value": "0" },
-								{ "key": "size", "value": "20" }
+								{ "key": "pagina", "value": "1" },
+								{ "key": "tamano", "value": "50" }
 							]
 						},
 						"description": "Busca facturas filtradas por número de póliza."
+					}
+				},
+				{
+					"name": "Buscar facturas - Por número de documento",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/facturacion/tracker/facturas?nroDocumento=900123456&pagina=1&tamano=50",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "facturacion", "tracker", "facturas"],
+							"query": [
+								{ "key": "nroDocumento", "value": "900123456", "description": "Número de documento del adquirente (opcional)" },
+								{ "key": "pagina", "value": "1" },
+								{ "key": "tamano", "value": "50" }
+							]
+						},
+						"description": "Busca facturas filtradas por número de documento del adquirente (nuevo filtro V2)."
 					}
 				},
 				{
@@ -201,14 +497,14 @@
 							{ "key": "Accept", "value": "application/json" }
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/facturacion/tracker/facturas?fechaInicio=2025-01-01&fechaFin=2025-06-30&page=0&size=50",
+							"raw": "{{baseUrl}}/api/v1/facturacion/tracker/facturas?fechaInicio=2025-01-01&fechaFin=2025-06-30&pagina=1&tamano=50",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "v1", "facturacion", "tracker", "facturas"],
 							"query": [
 								{ "key": "fechaInicio", "value": "2025-01-01", "description": "Fecha inicio (yyyy-MM-dd)" },
 								{ "key": "fechaFin", "value": "2025-06-30", "description": "Fecha fin (yyyy-MM-dd)" },
-								{ "key": "page", "value": "0" },
-								{ "key": "size", "value": "50" }
+								{ "key": "pagina", "value": "1" },
+								{ "key": "tamano", "value": "50" }
 							]
 						},
 						"description": "Busca facturas filtradas por rango de fechas. Ambas fechas son requeridas si se filtra por fecha."
@@ -222,18 +518,19 @@
 							{ "key": "Accept", "value": "application/json" }
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/facturacion/tracker/facturas?numPoliza=POL-2025-001&fechaInicio=2025-01-01&fechaFin=2025-06-30&page=0&size=20",
+							"raw": "{{baseUrl}}/api/v1/facturacion/tracker/facturas?numPoliza=POL-2025-001&nroDocumento=900123456&fechaInicio=2025-01-01&fechaFin=2025-06-30&pagina=1&tamano=20",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "v1", "facturacion", "tracker", "facturas"],
 							"query": [
 								{ "key": "numPoliza", "value": "POL-2025-001" },
+								{ "key": "nroDocumento", "value": "900123456" },
 								{ "key": "fechaInicio", "value": "2025-01-01" },
 								{ "key": "fechaFin", "value": "2025-06-30" },
-								{ "key": "page", "value": "0" },
-								{ "key": "size", "value": "20" }
+								{ "key": "pagina", "value": "1" },
+								{ "key": "tamano", "value": "20" }
 							]
 						},
-						"description": "Busca facturas combinando filtro de póliza y rango de fechas."
+						"description": "Busca facturas combinando todos los filtros: póliza, documento, rango de fechas y paginación."
 					}
 				},
 				{
@@ -264,9 +561,41 @@
 							"body": "{\n  \"codigo\": \"VALIDATION_ERROR\",\n  \"mensaje\": \"Ambas fechas (fechaInicio y fechaFin) deben proporcionarse o ambas deben omitirse\",\n  \"tipoError\": \"NEGOCIO\",\n  \"timestamp\": \"2025-06-15T10:30:00\"\n}"
 						}
 					]
+				},
+				{
+					"name": "Buscar facturas - Sin resultados",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/facturacion/tracker/facturas?numPoliza=INEXISTENTE&pagina=1&tamano=50",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "facturacion", "tracker", "facturas"],
+							"query": [
+								{ "key": "numPoliza", "value": "INEXISTENTE" },
+								{ "key": "pagina", "value": "1" },
+								{ "key": "tamano", "value": "50" }
+							]
+						},
+						"description": "Ejemplo con filtro que no retorna resultados."
+					},
+					"response": [
+						{
+							"name": "200 - Sin resultados",
+							"status": "OK",
+							"code": 200,
+							"header": [
+								{ "key": "Content-Type", "value": "application/json" }
+							],
+							"body": "{\n  \"content\": [],\n  \"totalElements\": 0,\n  \"totalPages\": 0,\n  \"currentPage\": 1,\n  \"pageSize\": 50\n}"
+						}
+					]
 				}
 			]
 		},
+
 		{
 			"name": "Documento Factura",
 			"description": "Detalle completo de documento de factura (PRC_GET_DOC_FACTURA)",
@@ -283,7 +612,7 @@
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "v1", "facturacion", "facturas", "100001"]
 						},
-						"description": "Retorna el detalle completo de un documento de factura por su ID interno.\n\n**SP:** PRC_GET_DOC_FACTURA(IP_ID_INT_FAC, OP_CURSOR)"
+						"description": "Retorna el detalle completo de un documento de factura por su ID interno (String/VARCHAR2).\n\n**SP:** PRC_GET_DOC_FACTURA(IP_ID_INT_FAC, OP_DATA, OP_RESULTADO, OP_ARRERRORES)"
 					},
 					"response": [
 						{
@@ -325,7 +654,7 @@
 		},
 		{
 			"name": "Logs",
-			"description": "Historial de logs y trazabilidad por póliza (PRC_GET_DETALLE_LOG)",
+			"description": "Historial de logs y trazabilidad por póliza con paginación client-side (PRC_GET_DETALLE_LOG)",
 			"item": [
 				{
 					"name": "Obtener logs por póliza",
@@ -343,7 +672,7 @@
 								{ "key": "size", "value": "50", "description": "Tamaño de página (default 50, max 200)" }
 							]
 						},
-						"description": "Retorna el historial paginado de logs y trazabilidad para una póliza específica.\n\n**SP:** PRC_GET_DETALLE_LOG(IP_NUM_SECU_POL, OP_CURSOR)"
+						"description": "Retorna el historial paginado de logs y trazabilidad para una póliza específica (numSecuPol como String/VARCHAR2). La paginación es client-side.\n\n**SP:** PRC_GET_DETALLE_LOG(IP_NUM_SECU_POL, OP_DATA, OP_RESULTADO, OP_ARRERRORES)"
 					},
 					"response": [
 						{

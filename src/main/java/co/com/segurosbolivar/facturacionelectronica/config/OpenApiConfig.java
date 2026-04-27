@@ -14,8 +14,8 @@ public class OpenApiConfig {
         return new OpenAPI()
                 .info(new Info()
                         .title("Facturación Electrónica Consulta API")
-                        .description("API REST para consulta de facturación electrónica - Portal de Autogestión")
-                        .version("1.0.0")
+                        .description("API REST para consulta de facturación electrónica - Portal de Autogestión. Expone 8 endpoints: Dashboard KPIs, Errores Agrupados, Duplicados, Tiempo Promedio Emisión, Top Productos Fallas, Tracker, Documento Factura y Logs.")
+                        .version("2.0.0")
                         .contact(new Contact()
                                 .name("Equipo Facturación Electrónica")
                                 .email("facturacion@segurosbolivar.com")));

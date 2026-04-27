@@ -28,7 +28,7 @@ class OpenApiIntegrationTest {
         assertNotNull(body);
         assertTrue(body.contains("\"openapi\""));
         assertTrue(body.contains("Consulta API"));
-        assertTrue(body.contains("1.0.0"));
+        assertTrue(body.contains("2.0.0"));
         assertTrue(body.contains("facturacion@segurosbolivar.com"));
     }
 
