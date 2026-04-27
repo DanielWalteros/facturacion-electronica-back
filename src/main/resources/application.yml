@@ -1,0 +1,43 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /facturacion-electronica
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+spring:
+  application:
+    name: facturacion-electronica-consulta
+
+app:
+  adapter:
+    v3:
+      base-url: ${ADAPTER_URL:https://4tldca0v35.execute-api.us-east-1.amazonaws.com/dev}
+      adapter-path: /api/v3/database/adapter
+      ejecutor: ejecutor_tronador
+      client-id: ${ADAPTER_CLIENT_ID:734qis31ulsqt3cbvlep49c120}
+      client-secret: ${ADAPTER_CLIENT_SECRET:1v3faqriigog3ftmsj6rluot1ad4u2sqho8hea5kalr2a34flt5a}
+      owner: OPS$PUMA
+      channel: ${ADAPTER_CHANNEL:facturacion-electronica-consulta}
+      channel-operation: ${ADAPTER_CHANNEL_OPERATION:consulta-facturacion}
+      timeout-seconds: 30
+      date-format: yyyy-MM-dd
+      package-name: SIM_PCK_FACTURA_ELECTRONICA
+      procedures:
+        dashboard-kpis: PRC_GET_DASHBOARD_KPIS
+        seguimiento-facturas: PRC_GET_SEGUIMIENTO_FACTURAS
+        doc-factura: PRC_GET_DOC_FACTURA
+        detalle-log: PRC_GET_DETALLE_LOG
+
+management:
+  health:
+    db:
+      enabled: false
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
